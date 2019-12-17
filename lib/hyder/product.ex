@@ -2,9 +2,13 @@ defmodule Hyder.Product do
   @moduledoc """
   A Hyder Product (Product for short later) is where the high level bussiness
   overview of a hyder application lays.
+
+  Products can have a `namespace` setting. There can be different products
+  with same names but in different namespaces. In one namespace, product names
+  should be unique.
   """
 
-  defstruct name: nil, title: nil, packages: []
+  defstruct namespace: nil, name: nil, title: nil, packages: []
 
   @type t :: __MODULE__
 
