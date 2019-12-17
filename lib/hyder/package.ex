@@ -9,7 +9,7 @@ defmodule Hyder.Package do
   @type version() :: binary
   @type file() :: binary() | {:file, Path.t()}
 
-  defstruct version: nil, files: []
+  defstruct version: nil, files: [], rollout: nil
 
   @doc """
   Build a new package struct.
@@ -78,7 +78,9 @@ defmodule Hyder.Package do
   ## Example
 
       iex> package = Hyder.Package.new("1.0.0")
-      ...> add_files_from_archive(package, {file: "path/to/zip"})
+      ...> package = add_files_from_archive(package, {:file, "test/fixtures/shop-v1.0.0-df8d87ef.zip"})
+      ...> length(package.files) > 0
+      true
 
   The file should be compressed in `zip` format.
   """
