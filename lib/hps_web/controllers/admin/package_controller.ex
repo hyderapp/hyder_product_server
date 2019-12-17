@@ -14,11 +14,9 @@ defmodule HPSWeb.Admin.PackageController do
     end
   end
 
-  def create(conn, %{"package" => params, "product_id" => product_id} = query) do
-    ns = Map.get(query, "namespace", "default")
-
-    with {:ok, %Product{} = product} <- Core.get_product_by_name(product_id, ns),
-         params = Map.put(params, "product_id", product.id),
+  def create(conn, %{"product_id" => _product_id} = params) do
+    with {:ok, %Product{} = product} <- fetch_product(params),
+         params = %{params | "product_id" => product.id},
          {:ok, %Package{} = package} <- Core.create_package(params) do
       conn
       |> put_status(:created)
@@ -27,9 +25,12 @@ defmodule HPSWeb.Admin.PackageController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    package = Core.get_package!(id)
-    render(conn, "show.json", package: package)
+  def show(conn, %{"id" => id, "product_id" => _product_id} = params) do
+    with {:ok, %Product{} = product} <- fetch_product(params),
+         {:ok, %Package{} = package} <- Core.get_package_by_version(product.id, id) do
+      conn
+      |> render("show.json", package: package)
+    end
   end
 
   def delete(conn, %{"id" => id, "product_id" => product_id}) do
@@ -38,5 +39,10 @@ defmodule HPSWeb.Admin.PackageController do
     with {:ok, %Package{}} <- Core.delete_package(package) do
       send_resp(conn, :no_content, "")
     end
+  end
+
+  defp fetch_product(%{"product_id" => product_id} = params) do
+    ns = Map.get(params, "namespace", "default")
+    Core.get_product_by_name(product_id, ns)
   end
 end

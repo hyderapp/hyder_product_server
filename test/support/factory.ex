@@ -8,7 +8,7 @@ defmodule HPS.Factory do
   def product_factory do
     %Product{
       name: sequence(:product_name, &"product-#{&1}"),
-      namespace: sequence(:namespace, ~w[default stg stg-1 stg-5 pre]),
+      namespace: "default",
       title: "fancy product description"
     }
   end
@@ -18,5 +18,8 @@ defmodule HPS.Factory do
       product: build(:product),
       version: sequence(:version, &"#{&1}")
     }
+  end
+
+  def rollout_factory do
   end
 end

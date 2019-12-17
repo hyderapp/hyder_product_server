@@ -38,8 +38,13 @@ defmodule HPS.Core do
   """
   def get_product!(id), do: Repo.get!(Product, id)
 
-  def get_product_by_name(name, namespace \\ "default"),
-    do: {:ok, Repo.one(Product, where: [namespace: namespace, name: name])}
+  def get_product_by_name(name, namespace \\ "default") do
+    product =
+      from(p in Product, where: p.namespace == ^namespace and p.name == ^name)
+      |> Repo.one!()
+
+    {:ok, product}
+  end
 
   @doc """
   Creates a product.
@@ -144,6 +149,11 @@ defmodule HPS.Core do
 
   """
   def get_package!(id), do: Repo.get!(Package, id)
+
+  def get_package_by_version(product_id, version) do
+    {:ok,
+     Repo.one!(from(p in Package, where: p.version == ^version and p.product_id == ^product_id))}
+  end
 
   @doc """
   Creates a package.

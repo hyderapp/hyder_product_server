@@ -15,7 +15,8 @@ defmodule HPS.Core.Package do
   @doc false
   def create_changeset(package, attrs) do
     package
-    |> cast(attrs, [:version])
-    |> validate_required([:version])
+    |> cast(attrs, [:version, :product_id])
+    |> validate_required([:version, :product_id])
+    |> validate_format(:version, ~r/^\d\S*$/)
   end
 end

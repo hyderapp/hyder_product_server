@@ -74,8 +74,8 @@ defmodule HPS.CoreTest do
   describe "packages" do
     alias HPS.Core.Package
 
-    @valid_attrs %{version: "some version"}
-    @update_attrs %{version: "some updated version"}
+    @valid_attrs %{version: "1.0.0"}
+    @update_attrs %{version: "1.2.3"}
     @invalid_attrs %{version: nil}
 
     def package_fixture(attrs \\ %{}) do
@@ -97,8 +97,10 @@ defmodule HPS.CoreTest do
     end
 
     test "create_package/1 with valid data creates a package" do
-      assert {:ok, %Package{} = package} = Core.create_package(@valid_attrs)
-      assert package.version == "some version"
+      product = insert(:product)
+      attrs = Map.put(@valid_attrs, :product_id, product.id)
+      assert {:ok, %Package{} = package} = Core.create_package(attrs)
+      assert package.version == "1.0.0"
     end
 
     test "create_package/1 with invalid data returns error changeset" do
