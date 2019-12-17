@@ -18,5 +18,6 @@ defmodule HPS.Core.Package do
     |> cast(attrs, [:version, :product_id])
     |> validate_required([:version, :product_id])
     |> validate_format(:version, ~r/^\d\S*$/)
+    |> unsafe_validate_unique([:version, :product_id], HPS.Repo)
   end
 end

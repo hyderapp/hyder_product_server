@@ -21,6 +21,7 @@ defmodule HPS.Core.Product do
     product
     |> cast(attrs, [:namespace, :name, :title])
     |> validate_required([:namespace, :name])
+    |> unsafe_validate_unique([:namespace, :name], HPS.Repo)
   end
 
   @doc false
