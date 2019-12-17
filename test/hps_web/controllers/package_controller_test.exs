@@ -53,9 +53,8 @@ defmodule HPSWeb.PackageControllerTest do
       conn = delete(conn, Routes.product_package_path(conn, :delete, package.product, package))
       assert response(conn, 204)
 
-      assert_error_sent(404, fn ->
-        get(conn, Routes.product_package_path(conn, :show, package.product, package))
-      end)
+      conn = get(conn, Routes.product_package_path(conn, :show, package.product, package))
+      assert json_response(conn, 404)
     end
   end
 

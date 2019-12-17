@@ -18,8 +18,10 @@ defmodule HPS.Core do
       [%Product{}, ...]
 
   """
-  def list_products do
-    Repo.all(Product)
+  def list_products(namespace \\ "default")
+
+  def list_products(namespace) do
+    Repo.all(from(p in Product, where: p.namespace == ^namespace))
   end
 
   @doc """
@@ -39,11 +41,15 @@ defmodule HPS.Core do
   def get_product!(id), do: Repo.get!(Product, id)
 
   def get_product_by_name(name, namespace \\ "default") do
-    product =
-      from(p in Product, where: p.namespace == ^namespace and p.name == ^name)
-      |> Repo.one!()
+    from(p in Product, where: p.namespace == ^namespace and p.name == ^name)
+    |> Repo.one()
+    |> case do
+      %Product{} = product ->
+        {:ok, product}
 
-    {:ok, product}
+      nil ->
+        {:error, :not_found}
+    end
   end
 
   @doc """

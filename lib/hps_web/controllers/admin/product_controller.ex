@@ -5,8 +5,8 @@ defmodule HPSWeb.Admin.ProductController do
 
   action_fallback(HPSWeb.FallbackController)
 
-  def index(conn, _params) do
-    products = Core.list_products()
+  def index(conn, params) do
+    products = params |> ns() |> Core.list_products()
     render(conn, "index.json", products: products)
   end
 
@@ -15,4 +15,14 @@ defmodule HPSWeb.Admin.ProductController do
       render(conn, "show.json", product: product)
     end
   end
+
+  def show(conn, %{"id" => id} = params) do
+    with {:ok, product} <- Core.get_product_by_name(id, ns(params)) do
+      conn
+      |> render("show.json", product: product)
+    end
+  end
+
+  defp ns(%{"namespace" => ns}), do: ns
+  defp ns(_), do: "default"
 end

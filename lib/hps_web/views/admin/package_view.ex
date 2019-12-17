@@ -3,14 +3,14 @@ defmodule HPSWeb.Admin.PackageView do
   alias HPSWeb.Admin.PackageView
 
   def render("index.json", %{packages: packages}) do
-    %{data: render_many(packages, PackageView, "package.json")}
+    %{success: true, data: render_many(packages, PackageView, "package.json")}
   end
 
   def render("show.json", %{package: package}) do
-    %{data: render_one(package, PackageView, "package.json")}
+    %{success: true, data: render_one(package, PackageView, "package.json")}
   end
 
   def render("package.json", %{package: package}) do
-    %{id: package.id, version: package.version}
+    %{version: package.version}
   end
 end

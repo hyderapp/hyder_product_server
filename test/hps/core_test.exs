@@ -27,7 +27,7 @@ defmodule HPS.CoreTest do
 
     test "list_products/0 returns all products" do
       product = product_fixture()
-      assert Core.list_products() == [product]
+      assert Core.list_products(product.namespace) == [product]
     end
 
     test "get_product!/1 returns the product with given id" do
