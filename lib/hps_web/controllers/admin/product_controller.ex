@@ -9,4 +9,10 @@ defmodule HPSWeb.Admin.ProductController do
     products = Core.list_products()
     render(conn, "index.json", products: products)
   end
+
+  def create(conn, params) do
+    with {:ok, product} <- Core.create_product(params) do
+      render(conn, "show.json", product: product)
+    end
+  end
 end

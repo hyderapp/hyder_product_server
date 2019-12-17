@@ -44,18 +44,17 @@ defmodule HPS.CoreTest do
       assert {:error, %Ecto.Changeset{}} = Core.create_product(@invalid_attrs)
     end
 
+    test "update_product/2, name and namespace are will not be updated" do
+      product = product_fixture()
+      assert {:ok, %Product{} = product} = Core.update_product(product, @update_attrs)
+      assert product.name == "some name"
+      assert product.namespace == "some namespace"
+    end
+
     test "update_product/2 with valid data updates the product" do
       product = product_fixture()
       assert {:ok, %Product{} = product} = Core.update_product(product, @update_attrs)
-      assert product.name == "some updated name"
-      assert product.namespace == "some updated namespace"
       assert product.title == "some updated title"
-    end
-
-    test "update_product/2 with invalid data returns error changeset" do
-      product = product_fixture()
-      assert {:error, %Ecto.Changeset{}} = Core.update_product(product, @invalid_attrs)
-      assert product == Core.get_product!(product.id)
     end
 
     test "delete_product/1 deletes the product" do

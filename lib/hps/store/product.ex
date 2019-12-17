@@ -34,11 +34,14 @@ defmodule HPS.Store.Product do
     {:reply, state, state}
   end
 
-  def handle_cast(:refresh, _from, _state) do
+  def handle_cast(:refresh, _state) do
     {:noreply, reload()}
   end
 
-  def reload() do
+  defp reload() do
     HPS.Core.list_products()
+  end
+
+  def terminate(_, _) do
   end
 end

@@ -10,8 +10,4 @@ defmodule HPS.Store do
   reading operations are way more than writing. Every time data gets
   modified, stores will be refreshed.
   """
-
-  def list_products do
-    HPS.Store.Product.list()
-  end
 end

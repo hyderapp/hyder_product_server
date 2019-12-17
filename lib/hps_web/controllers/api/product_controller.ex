@@ -1,12 +1,12 @@
 defmodule HPSWeb.API.ProductController do
   use HPSWeb, :controller
 
-  alias HPS.Store
+  alias HPS.Store.Product
 
   action_fallback(HPSWeb.FallbackController)
 
   def index(conn, _params) do
-    products = Store.list_products()
+    products = Product.list()
     render(conn, "index.json", products: products)
   end
 end

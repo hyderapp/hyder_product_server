@@ -48,9 +48,19 @@ defmodule HPS.Core do
 
   """
   def create_product(attrs \\ %{}) do
-    %Product{}
-    |> Product.changeset(attrs)
-    |> Repo.insert()
+    ret =
+      %Product{}
+      |> Product.create_changeset(attrs)
+      |> Repo.insert()
+
+    case ret do
+      {:ok, _} ->
+        HPS.Store.Product.refresh()
+        ret
+
+      _ ->
+        ret
+    end
   end
 
   @doc """
@@ -67,7 +77,7 @@ defmodule HPS.Core do
   """
   def update_product(%Product{} = product, attrs) do
     product
-    |> Product.changeset(attrs)
+    |> Product.update_changeset(attrs)
     |> Repo.update()
   end
 
@@ -97,6 +107,6 @@ defmodule HPS.Core do
 
   """
   def change_product(%Product{} = product) do
-    Product.changeset(product, %{})
+    Product.update_changeset(product, %{})
   end
 end

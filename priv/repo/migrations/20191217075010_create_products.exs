@@ -3,7 +3,7 @@ defmodule HPS.Repo.Migrations.CreateProducts do
 
   def change do
     create table(:products) do
-      add :namespace, :string
+      add :namespace, :string, null: false
       add :name, :string, null: false
       add :title, :string
 
