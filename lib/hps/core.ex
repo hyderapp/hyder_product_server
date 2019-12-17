@@ -4,6 +4,7 @@ defmodule HPS.Core do
   """
 
   alias HPS.Core.Product
+  alias HPS.Repo
 
   @doc """
   Returns the list of products.

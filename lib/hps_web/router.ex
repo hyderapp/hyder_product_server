@@ -19,8 +19,9 @@ defmodule HPSWeb.Router do
     get("/", PageController, :index)
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", HPSWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", HPSWeb do
+    pipe_through(:api)
+
+    resources("/products", ProductController, only: [:index])
+  end
 end
