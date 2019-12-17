@@ -1,0 +1,17 @@
+version: "3.6"
+
+# This is a quick setup for development
+# Usage:
+# 
+# cd docker && docker-compose up -d
+#
+# After that, postgreSQL should be running at port 5432
+
+services:
+  # 开发环境数据库
+  postgresql_dev:
+    image: sameersbn/postgresql:9.6
+    environment:
+      - PG_PASSWORD=postgres
+    ports:
+      - "5432:5432"
