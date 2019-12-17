@@ -11,9 +11,11 @@ defmodule HPS.Application do
       # Start the Ecto repository
       HPS.Repo,
       # Start the endpoint when the application starts
-      HPSWeb.Endpoint
+      HPSWeb.Endpoint,
       # Starts a worker by calling: HPS.Worker.start_link(arg)
       # {HPS.Worker, arg},
+      {Registry, [keys: :unique, name: HPS.Registry]},
+      HPS.Store.Product
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
