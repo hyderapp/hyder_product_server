@@ -19,7 +19,13 @@ defmodule HPSWeb.Router do
     get("/", PageController, :index)
   end
 
-  scope "/api", HPSWeb do
+  scope "/admin", HPSWeb.Admin do
+    pipe_through(:api)
+
+    resources("/products", ProductController, only: [:index])
+  end
+
+  scope "/api", HPSWeb.API do
     pipe_through(:api)
 
     resources("/products", ProductController, only: [:index])

@@ -1,4 +1,4 @@
-defmodule HPSWeb.ProductController do
+defmodule HPSWeb.Admin.ProductController do
   use HPSWeb, :controller
 
   alias HPS.Core

@@ -1,6 +1,6 @@
-defmodule HPSWeb.ProductView do
+defmodule HPSWeb.API.ProductView do
   use HPSWeb, :view
-  alias HPSWeb.ProductView
+  alias HPSWeb.API.ProductView
 
   def render("index.json", %{products: products}) do
     %{data: render_many(products, ProductView, "product.json")}
