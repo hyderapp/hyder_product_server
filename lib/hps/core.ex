@@ -4,7 +4,10 @@ defmodule HPS.Core do
   """
 
   alias HPS.Core.Product
+  alias HPS.Core.Package
   alias HPS.Repo
+
+  import Ecto.Query, only: [from: 2]
 
   @doc """
   Returns the list of products.
@@ -34,6 +37,9 @@ defmodule HPS.Core do
 
   """
   def get_product!(id), do: Repo.get!(Product, id)
+
+  def get_product_by_name(name, namespace \\ "default"),
+    do: {:ok, Repo.one(Product, where: [namespace: namespace, name: name])}
 
   @doc """
   Creates a product.
@@ -108,5 +114,68 @@ defmodule HPS.Core do
   """
   def change_product(%Product{} = product) do
     Product.update_changeset(product, %{})
+  end
+
+  @doc """
+  Returns the list of packages.
+
+  ## Examples
+
+      iex> list_packages(%Product{name: ..., id: ...})
+      [%Package{}, ...]
+
+  """
+  def list_packages(%Product{} = product) do
+    Repo.all(from(p in Package, where: p.product_id == ^product.id))
+  end
+
+  @doc """
+  Gets a single package.
+
+  Raises `Ecto.NoResultsError` if the Package does not exist.
+
+  ## Examples
+
+      iex> get_package!(123)
+      %Package{}
+
+      iex> get_package!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_package!(id), do: Repo.get!(Package, id)
+
+  @doc """
+  Creates a package.
+
+  ## Examples
+
+      iex> create_package(%{field: value})
+      {:ok, %Package{}}
+
+      iex> create_package(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_package(attrs \\ %{}) do
+    %Package{}
+    |> Package.create_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Deletes a Package.
+
+  ## Examples
+
+      iex> delete_package(package)
+      {:ok, %Package{}}
+
+      iex> delete_package(package)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_package(%Package{} = package) do
+    Repo.delete(package)
   end
 end

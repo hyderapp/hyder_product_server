@@ -1,6 +1,8 @@
 defmodule HPS.CoreTest do
   use HPS.DataCase
 
+  import HPS.Factory
+
   alias HPS.Core
 
   describe "products" do
@@ -66,6 +68,47 @@ defmodule HPS.CoreTest do
     test "change_product/1 returns a product changeset" do
       product = product_fixture()
       assert %Ecto.Changeset{} = Core.change_product(product)
+    end
+  end
+
+  describe "packages" do
+    alias HPS.Core.Package
+
+    @valid_attrs %{version: "some version"}
+    @update_attrs %{version: "some updated version"}
+    @invalid_attrs %{version: nil}
+
+    def package_fixture(attrs \\ %{}) do
+      insert(:package, attrs)
+    end
+
+    test "list_packages/1 returns all packages of a product" do
+      package = package_fixture(version: "1.10")
+      assert [%Package{version: "1.10"}] = Core.list_packages(package.product)
+
+      assert Core.list_packages(insert(:product)) == []
+    end
+
+    test "get_package!/1 returns the package with given id" do
+      package = package_fixture()
+      ret = Core.get_package!(package.id)
+
+      assert ret.version == package.version
+    end
+
+    test "create_package/1 with valid data creates a package" do
+      assert {:ok, %Package{} = package} = Core.create_package(@valid_attrs)
+      assert package.version == "some version"
+    end
+
+    test "create_package/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Core.create_package(@invalid_attrs)
+    end
+
+    test "delete_package/1 deletes the package" do
+      package = package_fixture()
+      assert {:ok, %Package{}} = Core.delete_package(package)
+      assert_raise Ecto.NoResultsError, fn -> Core.get_package!(package.id) end
     end
   end
 end

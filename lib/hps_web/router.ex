@@ -22,7 +22,9 @@ defmodule HPSWeb.Router do
   scope "/admin", HPSWeb.Admin do
     pipe_through(:api)
 
-    resources("/products", ProductController, only: [:index, :create, :delete, :update])
+    resources("/products", ProductController, except: [:new, :edit]) do
+      resources("/packages", PackageController, except: [:new, :edit])
+    end
   end
 
   scope "/api", HPSWeb.API do

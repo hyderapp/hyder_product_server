@@ -27,7 +27,7 @@ defmodule HPS.Store.Product do
   end
 
   def init(_) do
-    {:ok, reload()}
+    {:ok, []}
   end
 
   def handle_call(:list, _from, state) do

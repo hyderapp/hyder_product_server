@@ -4,10 +4,14 @@ defmodule HPS.Core.Product do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias HPS.Core.Package
+
   schema "products" do
     field(:name, :string)
     field(:namespace, :string, default: "default")
     field(:title, :string)
+
+    has_many(:packages, Package)
 
     timestamps()
   end
