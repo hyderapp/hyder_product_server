@@ -98,7 +98,12 @@ defmodule HPS.CoreTest do
 
     test "create_package/1 with valid data creates a package" do
       product = insert(:product)
-      attrs = Map.put(@valid_attrs, :product_id, product.id)
+
+      attrs =
+        @valid_attrs
+        |> Map.put(:product_id, product.id)
+        |> Map.put(:archive, File.read!(upload_fixture().path))
+
       assert {:ok, %Package{} = package} = Core.create_package(attrs)
       assert package.version == "1.0.0"
     end

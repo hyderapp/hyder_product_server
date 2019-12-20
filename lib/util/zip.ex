@@ -10,24 +10,24 @@ defmodule Hyder.Util.Zip do
   @doc """
   Get file entries in a zip archive, the result will appear in hyder file structs.
   """
-  def zip_entries(archive_io) do
+  def zip_entries(archive_io, opts \\ []) do
     {:ok, extract} =
       archive_io
       |> to_erl_open_term()
       |> :zip.extract([:memory])
 
-    to_files(extract)
+    to_files(extract, opts)
   end
 
   defp to_erl_open_term({:file, file}) when is_binary(file), do: String.to_charlist(file)
 
   defp to_erl_open_term(content) when is_binary(content), do: content
 
-  defp to_files(extract) do
+  defp to_files(extract, opts) do
     extract
     |> Stream.map(fn {name, bin} -> {to_string(name), bin} end)
     |> Stream.reject(&ignore?/1)
-    |> Stream.map(&to_hyder_file_struct/1)
+    |> Stream.map(&to_hyder_file_struct(&1, Keyword.get(opts, :struct, :struct)))
     |> Enum.to_list()
   end
 
@@ -35,13 +35,19 @@ defmodule Hyder.Util.Zip do
     Regex.match?(@ignore_file_patten, name)
   end
 
-  defp to_hyder_file_struct({name, bin}) do
-    %Hyder.File{
+  defp to_hyder_file_struct({name, bin}, Map) do
+    %{
       path: to_string(name),
       digest: hash(bin),
       size: byte_size(bin),
       content: bin
     }
+  end
+
+  defp to_hyder_file_struct(entry, :struct) do
+    entry
+    |> to_hyder_file_struct(Map)
+    |> Hyder.File.__struct__()
   end
 
   @doc """

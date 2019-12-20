@@ -22,4 +22,11 @@ defmodule HPS.Factory do
 
   def rollout_factory do
   end
+
+  def upload_fixture() do
+    %Plug.Upload{
+      path: "test/fixtures/shop-v1.0.0-df8d87ef.zip",
+      filename: "shop-v1.0.0-df8d87ef.zip"
+    }
+  end
 end

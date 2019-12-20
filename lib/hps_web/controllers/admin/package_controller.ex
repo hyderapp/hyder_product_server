@@ -6,17 +6,17 @@ defmodule HPSWeb.Admin.PackageController do
 
   action_fallback(HPSWeb.FallbackController)
 
-  def index(conn, %{"product_id" => product_id} = params) do
-    with {:ok, %Product{} = product} <- Core.get_product_by_name(product_id),
+  def index(conn, %{"product_id" => product_id}) do
+    with {:ok, %Product{} = product} <- fetch_product(product_id, conn),
          packages <- Core.list_packages(product) do
       conn
       |> render("index.json", packages: packages)
     end
   end
 
-  def create(conn, %{"product_id" => _product_id} = params) do
-    with {:ok, %Product{} = product} <- fetch_product(params, conn),
-         params = %{params | "product_id" => product.id},
+  def create(conn, %{"product_id" => product_id} = params) do
+    with {:ok, %Product{} = product} <- fetch_product(product_id, conn),
+         {:ok, params} <- prepare_create(params, product),
          {:ok, %Package{} = package} <- Core.create_package(params) do
       conn
       |> put_status(:created)
@@ -25,8 +25,8 @@ defmodule HPSWeb.Admin.PackageController do
     end
   end
 
-  def show(conn, %{"id" => id, "product_id" => _product_id} = params) do
-    with {:ok, %Product{} = product} <- fetch_product(params, conn),
+  def show(conn, %{"id" => id, "product_id" => product_id}) do
+    with {:ok, %Product{} = product} <- fetch_product(product_id, conn),
          {:ok, %Package{} = package} <- Core.get_package_by_version(product.id, id) do
       conn
       |> render("show.json", package: package)
@@ -41,7 +41,19 @@ defmodule HPSWeb.Admin.PackageController do
     end
   end
 
-  defp fetch_product(%{"product_id" => id}, conn) do
+  defp fetch_product(id, conn) do
     Core.get_product_by_name(id, conn.assigns.namespace)
   end
+
+  defp prepare_create(params, product) do
+    {:ok,
+     params
+     |> Map.merge(%{
+       "product_id" => product.id,
+       "archive" => archive_param(params)
+     })}
+  end
+
+  defp archive_param(%{"archive" => %Plug.Upload{path: path}}), do: File.read!(path)
+  defp archive_param(_), do: nil
 end

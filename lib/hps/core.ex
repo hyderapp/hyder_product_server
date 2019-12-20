@@ -173,7 +173,7 @@ defmodule HPS.Core do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_package(attrs \\ %{}) do
+  def create_package(attrs) do
     %Package{}
     |> Package.create_changeset(attrs)
     |> Repo.insert()
