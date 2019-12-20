@@ -15,9 +15,9 @@ defmodule HPSWeb.Admin.PackageController do
   end
 
   def create(conn, %{"product_id" => product_id} = params) do
-    with {:ok, %Product{} = product} <- fetch_product(product_id, conn),
+    with {:ok, product} <- fetch_product(product_id, conn),
          {:ok, params} <- prepare_create(params, product),
-         {:ok, %Package{} = package} <- Core.create_package(params) do
+         {:ok, package} <- Core.create_package(params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.product_package_path(conn, :show, product, package))
@@ -26,18 +26,22 @@ defmodule HPSWeb.Admin.PackageController do
   end
 
   def show(conn, %{"id" => id, "product_id" => product_id}) do
-    with {:ok, %Product{} = product} <- fetch_product(product_id, conn),
-         {:ok, %Package{} = package} <- Core.get_package_by_version(product.id, id) do
+    with {:ok, product} <- fetch_product(product_id, conn),
+         {:ok, package} <- Core.get_package_by_version(product.id, id) do
       conn
       |> render("show.json", package: package)
     end
   end
 
-  def delete(conn, %{"id" => id}) do
-    package = Core.get_package!(id)
-
-    with {:ok, %Package{}} <- Core.delete_package(package) do
-      send_resp(conn, :no_content, "")
+  def delete(conn, %{"id" => id, "product_id" => product_id}) do
+    with {:ok, product} <- fetch_product(product_id, conn),
+         {:ok, package} <- Core.get_package_by_version(product.id, id),
+         {:ok, _} <- Core.delete_package(package) do
+      conn
+      |> render("delete.json", [])
+    else
+      {:error, :not_found} ->
+        render(conn, "delete.json", [])
     end
   end
 

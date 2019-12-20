@@ -10,7 +10,7 @@ defmodule HPS.Core.Package do
     field(:archive, :binary, virtual: true)
 
     belongs_to(:product, Product)
-    has_many(:files, File)
+    has_many(:files, File, on_delete: :delete_all)
 
     timestamps()
   end

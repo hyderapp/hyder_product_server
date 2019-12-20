@@ -13,4 +13,8 @@ defmodule HPSWeb.Admin.PackageView do
   def render("package.json", %{package: package}) do
     %{version: package.version}
   end
+
+  def render("delete.json", %{}) do
+    %{success: true}
+  end
 end

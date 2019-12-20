@@ -61,7 +61,7 @@ defmodule HPSWeb.PackageControllerTest do
 
     test "deletes chosen package", %{conn: conn, package: package} do
       conn = delete(conn, product_package_path(conn, :delete, package.product, package))
-      assert response(conn, 204)
+      assert response(conn, 200)
 
       conn = get(conn, product_package_path(conn, :show, package.product, package))
       assert json_response(conn, 404)

@@ -157,8 +157,14 @@ defmodule HPS.Core do
   def get_package!(id), do: Repo.get!(Package, id)
 
   def get_package_by_version(product_id, version) do
-    {:ok,
-     Repo.one!(from(p in Package, where: p.version == ^version and p.product_id == ^product_id))}
+    Repo.one(from(p in Package, where: p.version == ^version and p.product_id == ^product_id))
+    |> case do
+      nil ->
+        {:error, :not_found}
+
+      %Package{} = package ->
+        {:ok, package}
+    end
   end
 
   @doc """
