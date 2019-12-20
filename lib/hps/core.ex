@@ -229,6 +229,7 @@ defmodule HPS.Core do
     |> Repo.update()
     |> case do
       {:ok, package} ->
+        HPS.Store.Product.refresh()
         {:ok, save_archive(package.product, package)}
 
       other ->
