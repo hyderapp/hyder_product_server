@@ -69,6 +69,6 @@ defmodule HyderPackageTest do
   end
 
   defp file(path, content) do
-    %{path: path, content: content, digest: hash(content), size: byte_size(content)}
+    %Hyder.File{path: path, content: content, digest: hash(content), size: byte_size(content)}
   end
 end

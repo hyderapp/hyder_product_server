@@ -7,7 +7,9 @@ defmodule HPS.Core.Package do
 
   schema "packages" do
     field(:version, :string)
+
     belongs_to(:product, Product)
+    has_many(:files, HPS.Core.File)
 
     timestamps()
   end

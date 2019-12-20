@@ -36,7 +36,7 @@ defmodule Hyder.Util.Zip do
   end
 
   defp to_hyder_file_struct({name, bin}) do
-    %{
+    %Hyder.File{
       path: to_string(name),
       digest: hash(bin),
       size: byte_size(bin),
