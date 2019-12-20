@@ -8,9 +8,10 @@ defmodule HPSWeb.API.ProductController do
   def index(conn, _params) do
     products =
       Product.list()
-      |> Enum.filter(&(&1.namespace == conn.assigns.namespace))
+      |> Stream.filter(&(&1.namespace == conn.assigns.namespace))
+      |> Stream.reject(&(&1.packages == []))
 
-    caches = %{enabled: true, paths: []}
+    caches = %{enabled: true, paths: Hyder.Product.all_paths(products)}
     render(conn, "index.json", products: products, caches: caches)
   end
 end

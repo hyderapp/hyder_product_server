@@ -19,8 +19,7 @@ defmodule HPSWeb.API.ProductView do
   def render("product.json", %{product: product}) do
     %{
       name: product.name,
-      # version: Hyder.Product.latest_package(product).version,
-      version: nil,
+      version: Hyder.Product.latest_package(product).version,
       full_download_url: nil,
       full_download_digest: nil,
       remove: []

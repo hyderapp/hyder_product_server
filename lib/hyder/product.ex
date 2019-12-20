@@ -97,4 +97,13 @@ defmodule Hyder.Product do
   def latest_package(%{packages: packages}) do
     packages |> Enum.max_by(&Version.parse(&1.version))
   end
+
+  @doc """
+  Given a list of products, return all file paths of their latest packages.
+  """
+  def all_paths(products) do
+    products
+    |> Enum.flat_map(fn product -> latest_package(product).files end)
+    |> Enum.uniq()
+  end
 end
