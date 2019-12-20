@@ -34,5 +34,8 @@ defmodule HPS.Store.Product do
 
   def handle_cast(:refresh, _state), do: {:noreply, reload()}
 
-  defp reload(), do: HPS.Core.list_products()
+  defp reload() do
+    HPS.Core.list_products()
+    |> HPS.Repo.preload([:packages])
+  end
 end

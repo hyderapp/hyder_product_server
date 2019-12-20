@@ -15,7 +15,7 @@ defmodule HPSWeb.Admin.PackageController do
   end
 
   def create(conn, %{"product_id" => _product_id} = params) do
-    with {:ok, %Product{} = product} <- fetch_product(params),
+    with {:ok, %Product{} = product} <- fetch_product(params, conn),
          params = %{params | "product_id" => product.id},
          {:ok, %Package{} = package} <- Core.create_package(params) do
       conn
@@ -26,14 +26,14 @@ defmodule HPSWeb.Admin.PackageController do
   end
 
   def show(conn, %{"id" => id, "product_id" => _product_id} = params) do
-    with {:ok, %Product{} = product} <- fetch_product(params),
+    with {:ok, %Product{} = product} <- fetch_product(params, conn),
          {:ok, %Package{} = package} <- Core.get_package_by_version(product.id, id) do
       conn
       |> render("show.json", package: package)
     end
   end
 
-  def delete(conn, %{"id" => id, "product_id" => product_id}) do
+  def delete(conn, %{"id" => id}) do
     package = Core.get_package!(id)
 
     with {:ok, %Package{}} <- Core.delete_package(package) do
@@ -41,8 +41,7 @@ defmodule HPSWeb.Admin.PackageController do
     end
   end
 
-  defp fetch_product(%{"product_id" => product_id} = params) do
-    ns = Map.get(params, "namespace", "default")
-    Core.get_product_by_name(product_id, ns)
+  defp fetch_product(%{"product_id" => id}, conn) do
+    Core.get_product_by_name(id, conn.assigns.namespace)
   end
 end

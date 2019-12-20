@@ -46,5 +46,6 @@ defmodule HPSWeb.Endpoint do
     signing_salt: "QsjoTXNS"
   )
 
+  plug(HPSWeb.Namespace)
   plug(HPSWeb.Router)
 end
