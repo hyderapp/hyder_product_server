@@ -17,6 +17,7 @@ defmodule HPSWeb.Router do
     pipe_through(:browser)
 
     get("/", PageController, :index)
+    get("/down/*package", DownloadController, :show)
   end
 
   scope "/admin", HPSWeb.Admin do

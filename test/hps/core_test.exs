@@ -96,7 +96,7 @@ defmodule HPS.CoreTest do
       assert ret.version == package.version
     end
 
-    test "create_package/1 with valid data creates a package" do
+    test "create_or_update_package/2 with valid data creates a package" do
       product = insert(:product)
 
       attrs =
@@ -104,12 +104,13 @@ defmodule HPS.CoreTest do
         |> Map.put(:product_id, product.id)
         |> Map.put(:archive, File.read!(upload_fixture().path))
 
-      assert {:ok, %Package{} = package} = Core.create_package(attrs)
+      assert {:ok, %Package{} = package} = Core.create_or_update_package(product, attrs)
       assert package.version == "1.0.0"
     end
 
-    test "create_package/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Core.create_package(@invalid_attrs)
+    test "create_or_update_package/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} =
+               Core.create_or_update_package(insert(:product), @invalid_attrs)
     end
 
     test "delete_package/1 deletes the package" do

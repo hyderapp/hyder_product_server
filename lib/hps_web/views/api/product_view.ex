@@ -2,6 +2,8 @@ defmodule HPSWeb.API.ProductView do
   use HPSWeb, :view
   alias HPSWeb.API.ProductView
 
+  import Hyder.Product, only: [latest_package: 1]
+
   def render("index.json", %{products: products, caches: caches}) do
     %{
       success: true,
@@ -17,12 +19,21 @@ defmodule HPSWeb.API.ProductView do
   end
 
   def render("product.json", %{product: product}) do
+    version = latest_package(product).version
+
     %{
       name: product.name,
-      version: Hyder.Product.latest_package(product).version,
-      full_download_url: nil,
+      version: version,
+      full_download_url: full_download_url(product.name, version),
       full_download_digest: nil,
       remove: []
     }
+  end
+
+  defp full_download_url(product, version),
+    do: Routes.download_url(HPSWeb.Endpoint, :show, [product_package_name(product, version)])
+
+  defp product_package_name(product, version) do
+    "#{product}-#{version}.zip"
   end
 end

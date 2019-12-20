@@ -158,6 +158,7 @@ defmodule HPS.Core do
 
   def get_package_by_version(product_id, version) do
     Repo.one(from(p in Package, where: p.version == ^version and p.product_id == ^product_id))
+    |> Repo.preload([:files])
     |> case do
       nil ->
         {:error, :not_found}
@@ -168,21 +169,71 @@ defmodule HPS.Core do
   end
 
   @doc """
-  Creates a package.
-
-  ## Examples
-
-      iex> create_package(%{field: value})
-      {:ok, %Package{}}
-
-      iex> create_package(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
+  Create or update a package.
   """
-  def create_package(attrs) do
+  def create_or_update_package(product, attrs) do
+    case create_package(product, attrs) do
+      {:ok, %Package{} = _package} ->
+        update_package(product, attrs)
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        if version_conflict?(changeset) do
+          update_package(product, attrs)
+        else
+          {:error, changeset}
+        end
+
+      other ->
+        other
+    end
+  end
+
+  defp version_conflict?(%{errors: errors}) when is_list(errors) do
+    match?(
+      {"has already been taken", _},
+      Keyword.get(errors, :version)
+    )
+  end
+
+  defp version_conflict?(_), do: false
+
+  defp create_package(_product, attrs) do
     %Package{}
     |> Package.create_changeset(attrs)
     |> Repo.insert()
+  end
+
+  def save_archive(product, package) do
+    path = archive_path(product.name, package.version)
+
+    with :ok <- File.mkdir_p(Path.dirname(path)),
+         :ok <- File.write(path, package.archive) do
+      package
+    end
+  end
+
+  def archive_path(name, version) do
+    Path.join([:code.priv_dir(:hps), "archive", "#{name}-#{version}.zip"])
+  end
+
+  @doc """
+  Update a package.
+  """
+  def update_package(%Product{} = product, attrs) do
+    version = attrs[:version] || attrs["version"]
+    {:ok, package} = get_package_by_version(product.id, version)
+
+    package
+    |> Repo.preload([:product, :files])
+    |> Package.update_changeset(attrs)
+    |> Repo.update()
+    |> case do
+      {:ok, package} ->
+        {:ok, save_archive(package.product, package)}
+
+      other ->
+        other
+    end
   end
 
   @doc """

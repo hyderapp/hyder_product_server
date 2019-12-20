@@ -17,9 +17,10 @@ defmodule HPS.Core.File do
   end
 
   @doc false
-  def create_changeset(attrs) do
-    %__MODULE__{}
-    |> cast(attrs, [:path, :digest, :size])
-    |> validate_required([:path, :digest, :size])
+  def create_changeset(file, attrs) do
+    file
+    |> cast(attrs, [:path, :digest, :size, :package_id])
+    |> cast_assoc(:package)
+    |> validate_required([:path, :digest, :size, :package_id])
   end
 end

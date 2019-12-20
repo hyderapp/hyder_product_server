@@ -17,10 +17,9 @@ defmodule HPSWeb.Admin.PackageController do
   def create(conn, %{"product_id" => product_id} = params) do
     with {:ok, product} <- fetch_product(product_id, conn),
          {:ok, params} <- prepare_create(params, product),
-         {:ok, package} <- Core.create_package(params) do
+         {:ok, package} <- Core.create_or_update_package(product, params) do
       conn
       |> put_status(:created)
-      |> put_resp_header("location", Routes.product_package_path(conn, :show, product, package))
       |> render("show.json", package: package)
     end
   end
