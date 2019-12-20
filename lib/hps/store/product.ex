@@ -36,6 +36,6 @@ defmodule HPS.Store.Product do
 
   defp reload() do
     HPS.Core.list_products()
-    |> HPS.Repo.preload([:packages])
+    |> HPS.Repo.preload(packages: :files)
   end
 end

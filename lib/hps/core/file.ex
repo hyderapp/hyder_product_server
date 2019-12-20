@@ -1,6 +1,8 @@
 defmodule HPS.Core.File do
   @moduledoc false
 
+  @derive {Jason.Encoder, only: [:digest, :path, :size]}
+
   use Ecto.Schema
   import Ecto.Changeset
 

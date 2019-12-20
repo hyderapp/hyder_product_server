@@ -103,7 +103,8 @@ defmodule Hyder.Product do
   """
   def all_paths(products) do
     products
-    |> Enum.flat_map(fn product -> latest_package(product).files end)
+    |> Stream.flat_map(fn product -> latest_package(product).files end)
+    |> Stream.map(fn %{path: path} -> path end)
     |> Enum.uniq()
   end
 end
