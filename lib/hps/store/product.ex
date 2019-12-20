@@ -18,30 +18,21 @@ defmodule HPS.Store.Product do
     GenServer.start_link(__MODULE__, [], opts)
   end
 
-  def list do
-    GenServer.call(@name, :list)
-  end
+  # ----------------------
+  #  API
+  # ----------------------
+  def list, do: GenServer.call(@name, :list)
 
-  def refresh() do
-    GenServer.cast(@name, :refresh)
-  end
+  def refresh(), do: GenServer.cast(@name, :refresh)
 
-  def init(_) do
-    {:ok, reload()}
-  end
+  # ----------------------
+  #  callbacks
+  # ----------------------
+  def init(_), do: {:ok, reload()}
 
-  def handle_call(:list, _from, state) do
-    {:reply, state, state}
-  end
+  def handle_call(:list, _from, state), do: {:reply, state, state}
 
-  def handle_cast(:refresh, _state) do
-    {:noreply, reload()}
-  end
+  def handle_cast(:refresh, _state), do: {:noreply, reload()}
 
-  defp reload() do
-    HPS.Core.list_products()
-  end
-
-  def terminate(_, _) do
-  end
+  defp reload(), do: HPS.Core.list_products()
 end
