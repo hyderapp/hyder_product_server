@@ -7,7 +7,7 @@ defmodule HPS.MixProject do
       version: "0.1.0",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers() ++ [:phoenix_swagger],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -44,7 +44,8 @@ defmodule HPS.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:credo, "~> 1.1.5"},
-      {:ex_machina, "~> 2.3"}
+      {:ex_machina, "~> 2.3"},
+      {:phoenix_swagger, "~> 0.8"}
     ]
   end
 

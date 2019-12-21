@@ -13,11 +13,29 @@ defmodule HPSWeb.Router do
     plug(:accepts, ["json"])
   end
 
+  pipeline :doc do
+    plug(:accepts, ["html"])
+
+    plug(Plug.Static,
+      at: "/",
+      from: "priv/static"
+    )
+  end
+
   scope "/", HPSWeb do
     pipe_through(:browser)
 
     get("/", PageController, :index)
     get("/down/*package", DownloadController, :show)
+  end
+
+  scope "/doc" do
+    pipe_through(:doc)
+
+    forward("/", PhoenixSwagger.Plug.SwaggerUI,
+      otp_app: :hps,
+      swagger_file: "swagger.json"
+    )
   end
 
   scope "/admin", HPSWeb.Admin do
@@ -32,5 +50,14 @@ defmodule HPSWeb.Router do
     pipe_through(:api)
 
     resources("/products", ProductController, only: [:index])
+  end
+
+  def swagger_info do
+    %{
+      info: %{
+        version: "1.0",
+        title: "Hyder Product Server"
+      }
+    }
   end
 end
