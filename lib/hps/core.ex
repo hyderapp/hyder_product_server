@@ -69,17 +69,15 @@ defmodule HPS.Core do
 
   """
   def create_product(attrs \\ %{}) do
-    ret =
-      %Product{}
-      |> Product.create_changeset(attrs)
-      |> Repo.insert()
-
-    case ret do
-      {:ok, _} ->
+    %Product{}
+    |> Product.create_changeset(attrs)
+    |> Repo.insert()
+    |> case do
+      {:ok, _} = ret ->
         HPS.Store.Product.refresh()
         ret
 
-      _ ->
+      ret ->
         ret
     end
   end
@@ -332,8 +330,8 @@ defmodule HPS.Core do
         %Package{} = p ->
           {:ok, _} =
             Repo.transaction(fn ->
-              up.(p)
-              down.(package)
+              {:ok, _} = up.(p)
+              {:ok, _} = down.(package)
             end)
 
           HPS.Store.Product.refresh()
