@@ -93,10 +93,25 @@ defmodule Hyder.Product do
       ...> |> add_package(package3)
       ...> |> latest_package()
       %Hyder.Package{version: "1.10.0"}
+
+  Or use lists:
+
+      iex> package1 = Hyder.Package.new("1.2.0")
+      ...> package2 = Hyder.Package.new("1.10.0")
+      ...> package3 = Hyder.Package.new("0.1.0")
+      ...> latest_package([package1, package2, package3])
+      %Hyder.Package{version: "1.10.0"}
+
+  Notice: `version` values of the packages should be all valid with
+  Elixir's version specification, otherwise comparing will not work
+  and the result is not expected.
+
+  @see https://hexdocs.pm/elixir/Version.html#module-versions
   """
-  def latest_package(%{packages: packages}) do
-    packages |> Enum.max_by(&Version.parse(&1.version))
-  end
+  def latest_package(%{packages: packages}), do: latest_package(packages)
+
+  def latest_package(packages) when is_list(packages),
+    do: packages |> Enum.max_by(&Version.parse(&1.version))
 
   @doc """
   Given a list of products, return all file paths of their latest packages.

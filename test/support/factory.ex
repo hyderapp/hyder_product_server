@@ -16,7 +16,8 @@ defmodule HPS.Factory do
   def package_factory do
     %Package{
       product: build(:product),
-      version: sequence(:version, &"#{&1}")
+      version: sequence(:version, &"#{&1}.0.0"),
+      online: false
     }
   end
 

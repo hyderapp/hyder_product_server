@@ -156,6 +156,9 @@ defmodule HPS.Core do
   """
   def get_package!(id), do: Repo.get!(Package, id)
 
+  def get_package_by_version(%Product{id: id}, version),
+    do: get_package_by_version(id, version)
+
   def get_package_by_version(product_id, version) do
     Repo.one(from(p in Package, where: p.version == ^version and p.product_id == ^product_id))
     |> Repo.preload([:files])
@@ -251,5 +254,86 @@ defmodule HPS.Core do
   """
   def delete_package(%Package{} = package) do
     Repo.delete(package)
+  end
+
+  @doc """
+  Get all online (actively using) packages of a product.
+  """
+  def online_packages(%Product{} = product) do
+    product
+    |> Repo.preload(:online_packages)
+    |> Map.get(:online_packages)
+  end
+
+  def offline_packages(%Product{} = product, filter \\ fn _ -> true end) do
+    product
+    |> Repo.preload(:offline_packages)
+    |> Map.get(:offline_packages)
+    |> Enum.filter(filter)
+  end
+
+  @doc """
+  Put a specific version of package online, causing all other packages offline.
+  """
+  def put_package_online(%Product{id: pid}, version) do
+    with {:ok, _package} <- get_package_by_version(pid, version) do
+      query =
+        from(p in Package,
+          where: p.product_id == ^pid,
+          update: [set: [online: fragment("version = ?", ^version)]]
+        )
+
+      Repo.update_all(query, [])
+      :ok
+    end
+  end
+
+  @doc """
+  Put a specific version of package offline, causing the highest versioned
+  package in left going online.
+
+  For instance, if we have three packages of a package, as below:
+  - version: 1, offline
+  - version: 2, online
+  - version: 3, offline
+
+  Now if we put package 2 offline, it will make version 1 online.
+
+  If we try to put an already offline package offline, nothing will change.
+  """
+  def put_package_offline(%Product{id: pid} = product, version) do
+    down = fn p ->
+      p
+      |> Package.online_status_changeset(%{online: false})
+      |> Repo.update()
+    end
+
+    up = fn p ->
+      p
+      |> Package.online_status_changeset(%{online: true})
+      |> Repo.update()
+    end
+
+    with {:ok, package} <- get_package_by_version(pid, version),
+         {:online, true} <- {:online, package.online} do
+      packages = offline_packages(product, &(Version.parse(&1.version) < Version.parse(version)))
+
+      case Hyder.Product.latest_package(packages) do
+        nil ->
+          down.(package)
+
+        %Package{} = p ->
+          {:ok, _} =
+            Repo.transaction(fn ->
+              up.(p)
+              down.(package)
+            end)
+
+          :ok
+      end
+    else
+      {:online, false} ->
+        :ok
+    end
   end
 end

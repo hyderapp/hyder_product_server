@@ -12,6 +12,8 @@ defmodule HPS.Core.Product do
     field(:title, :string)
 
     has_many(:packages, Package)
+    has_many(:online_packages, Package, where: [online: true])
+    has_many(:offline_packages, Package, where: [online: false])
 
     timestamps()
   end

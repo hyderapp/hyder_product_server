@@ -9,6 +9,7 @@ defmodule HPS.Core.Package do
   schema "packages" do
     field(:version, :string)
     field(:archive, :binary, virtual: true)
+    field(:online, :boolean, default: false)
 
     belongs_to(:product, Product)
     has_many(:files, File, on_delete: :delete_all, on_replace: :delete)
@@ -21,9 +22,19 @@ defmodule HPS.Core.Package do
     package
     |> cast(attrs, [:version, :product_id])
     |> validate_required([:version, :product_id])
-    |> validate_format(:version, ~r/^\d\S*$/)
+    |> validate_change(:version, &validate_version/2)
     |> assoc_constraint(:product)
     |> unsafe_validate_unique([:version, :product_id], HPS.Repo)
+  end
+
+  defp validate_version(:version, version) do
+    case Version.parse(version) do
+      :error ->
+        [version: "is invalid"]
+
+      _ ->
+        []
+    end
   end
 
   @doc false
@@ -32,6 +43,13 @@ defmodule HPS.Core.Package do
     |> cast(attrs, [:archive])
     |> validate_required([:archive])
     |> auto_build_files()
+  end
+
+  @doc false
+  def online_status_changeset(package, attrs) do
+    package
+    |> cast(attrs, [:online])
+    |> validate_required([:online])
   end
 
   defp auto_build_files(%{valid?: true, changes: %{archive: archive}} = changeset) do
