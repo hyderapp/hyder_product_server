@@ -284,6 +284,7 @@ defmodule HPS.Core do
         )
 
       Repo.update_all(query, [])
+      HPS.Store.Product.refresh()
       :ok
     end
   end
@@ -321,6 +322,8 @@ defmodule HPS.Core do
       case Hyder.Product.latest_package(packages) do
         nil ->
           down.(package)
+          HPS.Store.Product.refresh()
+          :ok
 
         %Package{} = p ->
           {:ok, _} =
@@ -329,6 +332,7 @@ defmodule HPS.Core do
               down.(package)
             end)
 
+          HPS.Store.Product.refresh()
           :ok
       end
     else

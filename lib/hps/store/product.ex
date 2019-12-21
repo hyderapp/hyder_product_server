@@ -36,6 +36,9 @@ defmodule HPS.Store.Product do
 
   defp reload() do
     HPS.Core.list_products()
-    |> HPS.Repo.preload(packages: :files)
+    |> HPS.Repo.preload(online_packages: :files)
+    |> Enum.map(fn %{online_packages: packages} = product ->
+      Map.delete(%{product | packages: packages}, :online_packages)
+    end)
   end
 end
