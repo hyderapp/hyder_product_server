@@ -22,6 +22,7 @@ defmodule HPS.Core do
 
   def list_products(namespace) do
     Repo.all(from(p in Product, where: p.namespace == ^namespace))
+    |> Repo.preload(:online_packages)
   end
 
   @doc """
@@ -40,9 +41,12 @@ defmodule HPS.Core do
   """
   def get_product!(id), do: Repo.get!(Product, id)
 
-  def get_product_by_name(name, namespace \\ "default") do
+  def get_product_by_name(name, namespace \\ "default", opts \\ [])
+
+  def get_product_by_name(name, namespace, opts) do
     from(p in Product, where: p.namespace == ^namespace and p.name == ^name)
     |> Repo.one()
+    |> Repo.preload(Keyword.get(opts, :preload, []))
     |> case do
       %Product{} = product ->
         {:ok, product}

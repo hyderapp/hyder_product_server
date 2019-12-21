@@ -21,7 +21,7 @@ defmodule HPSWeb.Namespace do
 
   @default "default"
 
-  defp fetch_ns(%{req_params: %{"namespace" => ""}}), do: @default
-  defp fetch_ns(%{req_params: %{"namespace" => ns}}), do: ns
+  defp fetch_ns(%{params: %{"namespace" => ""}}), do: @default
+  defp fetch_ns(%{params: %{"namespace" => ns}}), do: ns
   defp fetch_ns(_), do: @default
 end

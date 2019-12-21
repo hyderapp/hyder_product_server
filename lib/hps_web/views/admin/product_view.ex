@@ -1,6 +1,7 @@
 defmodule HPSWeb.Admin.ProductView do
   use HPSWeb, :view
   alias HPSWeb.Admin.ProductView
+  alias HPSWeb.Admin.PackageView
 
   def render("index.json", %{products: products}) do
     %{success: true, data: render_many(products, ProductView, "product.json")}
@@ -11,6 +12,15 @@ defmodule HPSWeb.Admin.ProductView do
   end
 
   def render("product.json", %{product: product}) do
-    %{name: product.name, title: product.title}
+    product
+    |> Map.take([:name, :title, :online_packages])
+    |> with_online_packages()
   end
+
+  # defp with_online_packages(%{online_packages: packages} = map) when is_list(packages), do: map
+  defp with_online_packages(%{online_packages: packages} = map) when is_list(packages) do
+    Map.update!(map, :online_packages, &render_many(&1, PackageView, "package.json"))
+  end
+
+  defp with_online_packages(map), do: Map.delete(map, :online_packages)
 end

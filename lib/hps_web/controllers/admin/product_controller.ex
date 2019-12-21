@@ -6,7 +6,11 @@ defmodule HPSWeb.Admin.ProductController do
   action_fallback(HPSWeb.FallbackController)
 
   def index(conn, _params) do
-    products = Core.list_products(conn.assigns.namespace)
+    products =
+      conn.assigns.namespace
+      |> Core.list_products()
+      |> HPS.Repo.preload(:online_packages)
+
     render(conn, "index.json", products: products)
   end
 
@@ -17,7 +21,9 @@ defmodule HPSWeb.Admin.ProductController do
   end
 
   def show(conn, %{"id" => id}) do
-    with {:ok, product} <- Core.get_product_by_name(id, conn.assigns.namespace) do
+    preload = :online_packages
+
+    with {:ok, product} <- Core.get_product_by_name(id, conn.assigns.namespace, preload: preload) do
       conn
       |> render("show.json", product: product)
     end
