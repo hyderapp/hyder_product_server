@@ -11,6 +11,10 @@ defmodule HPSWeb.Admin.PackageView do
   end
 
   def render("package.json", %{package: package}) do
+    %{version: package.version, online: package.online}
+  end
+
+  def render("online-package.json", %{package: package}) do
     %{version: package.version}
   end
 

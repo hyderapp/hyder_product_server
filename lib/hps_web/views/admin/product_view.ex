@@ -17,9 +17,12 @@ defmodule HPSWeb.Admin.ProductView do
     |> with_online_packages()
   end
 
-  # defp with_online_packages(%{online_packages: packages} = map) when is_list(packages), do: map
   defp with_online_packages(%{online_packages: packages} = map) when is_list(packages) do
-    Map.update!(map, :online_packages, &render_many(&1, PackageView, "package.json"))
+    Map.update!(
+      map,
+      :online_packages,
+      &render_many(&1, PackageView, "online-package.json")
+    )
   end
 
   defp with_online_packages(map), do: Map.delete(map, :online_packages)
