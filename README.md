@@ -31,6 +31,9 @@ The server is running at [http://127.0.0.1:4000](http://127.0.0.1:4000), you can
 
 TODO: to be documented.
 
+You can visit an interactive document in [http://127.0.0.1:4000/doc](http://127.0.0.1:4000/doc) via a [swagger_ui][swagger_ui] service.
+
 [hyder]: https://github.com/hyderapp/
 [elixir]: https://elixir-lang.org/
 [docker]: https://www.docker.com/
+[swagger_ui]: https://swagger.io/tools/swagger-ui/
