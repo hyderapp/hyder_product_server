@@ -401,6 +401,19 @@ defmodule HPS.Core do
   end
 
   defp product_rollouted_version(product) do
+    case current_rollout(product) do
+      nil ->
+        nil
+
+      %{target_version: v} ->
+        v
+    end
+  end
+
+  @doc """
+  Get most recent done rollout of a product.
+  """
+  def current_rollout(%Product{} = product) do
     query =
       from(r in Rollout,
         where: r.status == "done" and r.product_id == ^product.id,
@@ -410,13 +423,6 @@ defmodule HPS.Core do
 
     query
     |> Repo.one()
-    |> case do
-      nil ->
-        nil
-
-      %{target_version: v} ->
-        v
-    end
   end
 
   @doc """
@@ -452,15 +458,17 @@ defmodule HPS.Core do
 
   ## Examples
 
-      iex> delete_rollout(rollout)
+      iex> rollback(rollout)
       {:ok, %Rollout{}}
 
-      iex> delete_rollout(rollout)
+      iex> rollback(rollout)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_rollout(%Rollout{} = rollout) do
-    Repo.delete(rollout)
+  def rollback(%Rollout{} = rollout) do
+    rollout
+    |> Rollout.rollback_changeset()
+    |> Repo.update()
   end
 
   @doc """

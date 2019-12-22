@@ -38,6 +38,11 @@ defmodule HPSWeb.Admin.RolloutController do
     render(conn, "show.json", rollout: rollout)
   end
 
+  def show_current(conn, _params) do
+    rollout = Core.current_rollout(conn.assigns.product)
+    render(conn, "show.json", rollout: rollout)
+  end
+
   def update(conn, %{"id" => id} = params) do
     with %Rollout{} = rollout <- Core.get_rollout_by_version(conn.assigns.product, id),
          {:ok, %Rollout{} = rollout} <- Core.update_rollout(rollout, params) do
@@ -50,6 +55,18 @@ defmodule HPSWeb.Admin.RolloutController do
 
     with {:ok, %Rollout{}} <- Core.delete_rollout(rollout) do
       send_resp(conn, :no_content, "")
+    end
+  end
+
+  def rollback_current(conn, _params) do
+    with {:rollout, %Rollout{} = rollout} <-
+           {:rollout, Core.current_rollout(conn.assigns.product)},
+         {:ok, rollout} <- Core.rollback(rollout) do
+      conn
+      |> render("show.json", rollout: rollout)
+    else
+      {:rollout, ni} ->
+        {:error, :not_found}
     end
   end
 

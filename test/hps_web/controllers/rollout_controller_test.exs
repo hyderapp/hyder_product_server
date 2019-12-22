@@ -143,14 +143,50 @@ defmodule HPSWeb.RolloutControllerTest do
     end
   end
 
-  describe "delete rollout" do
-    test "deletes chosen rollout", %{conn: conn, rollout: rollout} do
-      conn = delete(conn, Routes.rollout_path(conn, :delete, rollout))
-      assert response(conn, 204)
+  describe "show current" do
+    setup [:create_product]
 
-      assert_error_sent(404, fn ->
-        get(conn, Routes.rollout_path(conn, :show, rollout))
-      end)
+    test "it returns emtpy when no rollout availble", %{conn: conn, product: product} do
+      conn = get(conn, Routes.product_rollout_path(conn, :show_current, product.name))
+
+      assert json_response(conn, 200)["data"] == nil
+    end
+
+    test "it returns the most recent done rollout", %{conn: conn, product: product} do
+      p1 = insert(:package, product: product, version: "1.1.0", online: false)
+      t = DateTime.utc_now() |> DateTime.add(-3600, :second) |> DateTime.truncate(:second)
+      release_package(product, p1, done_at: t)
+
+      p2 = insert(:package, product: product, version: "1.2.0", online: true)
+      release_package(product, p2)
+
+      conn = get(conn, Routes.product_rollout_path(conn, :show_current, product.name))
+
+      assert %{"target_version" => "1.2.0"} = json_response(conn, 200)["data"]
+    end
+  end
+
+  describe "rollback" do
+    setup [:create_product]
+
+    test "no rollout to rollback", %{conn: conn, product: product} do
+      conn = delete(conn, Routes.product_rollback_path(conn, :rollback_current, product.name))
+      assert json_response(conn, 422)
+    end
+
+    test "rollback current rollout", %{conn: conn, product: product} do
+      p = insert(:package, product: product, online: true)
+      version = p.version
+      release_package(product, p)
+
+      assert {:ok, %{online: true}} = Core.get_package_by_version(product, version)
+
+      conn = delete(conn, Routes.product_rollback_path(conn, :rollback_current, product.name))
+
+      assert %{"status" => "rollback", "target_version" => ^version} =
+               json_response(conn, 200)["data"]
+
+      assert {:ok, %{online: false}} = Core.get_package_by_version(product, version)
     end
   end
 
@@ -166,5 +202,20 @@ defmodule HPSWeb.RolloutControllerTest do
       insert(:rollout, product: package.product, package: package, target_version: package.version)
 
     {:ok, Map.take(rollout, [:product, :package, :target_version])}
+  end
+
+  defp release_package(product, package, opts \\ []) do
+    opts =
+      [
+        product: product,
+        package: package,
+        target_version: package.version,
+        status: "done",
+        progress: 1.0,
+        done_at: DateTime.utc_now() |> DateTime.truncate(:second)
+      ]
+      |> Keyword.merge(opts)
+
+    insert(:rollout, opts)
   end
 end

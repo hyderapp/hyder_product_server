@@ -44,6 +44,9 @@ defmodule HPSWeb.Router do
     resources("/products", ProductController, except: [:new, :edit]) do
       resources("/packages", PackageController, except: [:new, :edit])
       resources("/rollouts", RolloutController, except: [:new, :edit, :delete])
+
+      get("/rollout", RolloutController, :show_current)
+      delete("/rollout", RolloutController, :rollback_current, as: :rollback)
     end
   end
 

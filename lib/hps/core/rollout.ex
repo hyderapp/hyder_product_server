@@ -85,4 +85,14 @@ defmodule HPS.Core.Rollout do
   end
 
   defp update_status(changeset), do: changeset
+
+  @doc false
+  def rollback_changeset(rollout) do
+    rollout
+    |> Repo.preload(:package)
+    |> cast(%{}, [])
+    |> put_change(:status, "rollback")
+    |> put_change(:progress, 0.0)
+    |> update_package()
+  end
 end
