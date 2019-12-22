@@ -35,6 +35,11 @@ config :hps, :phoenix_swagger,
 
 config :phoenix_swagger, json_library: Jason
 
+# If you want to save archives in different a directory,
+# you can uncomment the line and change it:
+#
+# config :hps, :archive_storage_path, "priv/archive"
+
 import_config "policy.exs"
 
 # Import environment specific config. This must remain at the bottom
