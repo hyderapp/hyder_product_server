@@ -171,20 +171,24 @@ defmodule Hyder.Product do
   ## Example
 
       iex> parse_base("home:2.3.4")
-      %{"home" => "2.3.4"}
+      [{"home", "2.3.4"}]
 
       iex> parse_base("post:1.10.5,about:1.3.1")
-      %{"post" => "1.10.5", "about" => "1.3.1"}
+      [{"post", "1.10.5"}, {"about", "1.3.1"}]
 
       iex> parse_base(nil)
-      %{}
+      []
+
+      iex> parse_base("anything invalid")
+      []
   """
-  def parse_base(nil), do: %{}
+  def parse_base(nil), do: []
 
   def parse_base(str) when is_binary(str) do
     String.split(str, ",")
     |> Stream.map(&String.split(&1, ":"))
     |> Stream.map(&List.to_tuple/1)
+    |> Stream.filter(&match?({_, _}, &1))
     |> Enum.to_list()
   end
 
