@@ -342,4 +342,137 @@ defmodule HPS.Core do
         :ok
     end
   end
+
+  alias HPS.Core.Rollout
+
+  @doc """
+  Returns the list of rollouts.
+
+  ## Examples
+
+      iex> list_rollouts(product)
+      [%Rollout{}, ...]
+
+  """
+  def list_rollouts(%Product{} = product) do
+    from(r in Rollout, where: r.product_id == ^product.id)
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single rollout.
+
+  Raises `Ecto.NoResultsError` if the Rollout does not exist.
+
+  ## Examples
+
+      iex> get_rollout!(123)
+      %Rollout{}
+
+      iex> get_rollout!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_rollout!(id), do: Repo.get!(Rollout, id)
+
+  @doc """
+  Creates a rollout.
+
+  ## Examples
+
+      iex> create_rollout(product, package)
+      {:ok, %Rollout{}}
+
+      iex> create_rollout(product, package)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_rollout(%Product{} = product, %Package{} = package) do
+    attrs = %{
+      product_id: product.id,
+      package_id: package.id,
+      target_version: package.version,
+      previous_version: product_rollouted_version(product)
+    }
+
+    %Rollout{}
+    |> Rollout.create_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  defp product_rollouted_version(product) do
+    query =
+      from(r in Rollout,
+        where: r.status == "done" and r.product_id == ^product.id,
+        limit: 1,
+        order_by: [desc: :done_at]
+      )
+
+    query
+    |> Repo.one()
+    |> case do
+      nil ->
+        nil
+
+      %{target_version: v} ->
+        v
+    end
+  end
+
+  @doc """
+  Get rollout by target version.
+  """
+  def get_rollout_by_version(%Product{} = product, version) do
+    from(r in Rollout,
+      where: r.product_id == ^product.id and r.target_version == ^version
+    )
+    |> Repo.one()
+  end
+
+  @doc """
+  Updates a rollout.
+
+  ## Examples
+
+      iex> update_rollout(rollout, %{progress: 0.5})
+      {:ok, %Rollout{}}
+
+      iex> update_rollout(rollout, %{progress: 0})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_rollout(%Rollout{} = rollout, attrs) do
+    rollout
+    |> Rollout.update_changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a Rollout.
+
+  ## Examples
+
+      iex> delete_rollout(rollout)
+      {:ok, %Rollout{}}
+
+      iex> delete_rollout(rollout)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_rollout(%Rollout{} = rollout) do
+    Repo.delete(rollout)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking rollout changes.
+
+  ## Examples
+
+      iex> change_rollout(rollout)
+      %Ecto.Changeset{source: %Rollout{}}
+
+  """
+  def change_rollout(%Rollout{} = rollout) do
+    Rollout.changeset(rollout, %{})
+  end
 end

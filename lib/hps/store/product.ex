@@ -28,7 +28,13 @@ defmodule HPS.Store.Product do
   # ----------------------
   #  callbacks
   # ----------------------
-  def init(_), do: {:ok, reload()}
+  def init(_) do
+    if Mix.env() == :test do
+      {:ok, []}
+    else
+      {:ok, reload()}
+    end
+  end
 
   def handle_call(:list, _from, state), do: {:reply, state, state}
 

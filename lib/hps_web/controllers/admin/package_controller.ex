@@ -2,7 +2,7 @@ defmodule HPSWeb.Admin.PackageController do
   use HPSWeb, :controller
 
   alias HPS.Core
-  alias HPS.Core.{Product, Package}
+  alias HPS.Core.{Product}
 
   action_fallback(HPSWeb.FallbackController)
 

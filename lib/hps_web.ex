@@ -23,6 +23,7 @@ defmodule HPSWeb do
 
       import Plug.Conn
       import HPSWeb.Gettext
+
       alias HPSWeb.Router.Helpers, as: Routes
     end
   end

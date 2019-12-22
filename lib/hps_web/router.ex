@@ -43,6 +43,7 @@ defmodule HPSWeb.Router do
 
     resources("/products", ProductController, except: [:new, :edit]) do
       resources("/packages", PackageController, except: [:new, :edit])
+      resources("/rollouts", RolloutController, except: [:new, :edit, :delete])
     end
   end
 

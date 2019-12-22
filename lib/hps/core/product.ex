@@ -4,7 +4,7 @@ defmodule HPS.Core.Product do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias HPS.Core.Package
+  alias HPS.Core.{Package, Rollout}
 
   schema "products" do
     field(:name, :string)
@@ -14,6 +14,9 @@ defmodule HPS.Core.Product do
     has_many(:packages, Package)
     has_many(:online_packages, Package, where: [online: true])
     has_many(:offline_packages, Package, where: [online: false])
+
+    has_many(:rollouts, Rollout)
+    has_many(:done_rollouts, Rollout, where: [status: "done"])
 
     timestamps()
   end

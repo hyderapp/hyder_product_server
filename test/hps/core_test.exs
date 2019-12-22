@@ -119,4 +119,67 @@ defmodule HPS.CoreTest do
       assert_raise Ecto.NoResultsError, fn -> Core.get_package!(package.id) end
     end
   end
+
+  describe "rollouts" do
+    alias HPS.Core.Rollout
+
+    @valid_attrs %{policy: "some policy", progress: 120.5, status: "some status"}
+    @update_attrs %{policy: "some updated policy", progress: 456.7, status: "some updated status"}
+    @invalid_attrs %{policy: nil, progress: nil, status: nil}
+
+    def rollout_fixture(attrs \\ %{}) do
+      {:ok, rollout} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Core.create_rollout()
+
+      rollout
+    end
+
+    test "list_rollouts/0 returns all rollouts" do
+      rollout = rollout_fixture()
+      assert Core.list_rollouts() == [rollout]
+    end
+
+    test "get_rollout!/1 returns the rollout with given id" do
+      rollout = rollout_fixture()
+      assert Core.get_rollout!(rollout.id) == rollout
+    end
+
+    test "create_rollout/1 with valid data creates a rollout" do
+      assert {:ok, %Rollout{} = rollout} = Core.create_rollout(@valid_attrs)
+      assert rollout.policy == "some policy"
+      assert rollout.progress == 120.5
+      assert rollout.status == "some status"
+    end
+
+    test "create_rollout/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Core.create_rollout(@invalid_attrs)
+    end
+
+    test "update_rollout/2 with valid data updates the rollout" do
+      rollout = rollout_fixture()
+      assert {:ok, %Rollout{} = rollout} = Core.update_rollout(rollout, @update_attrs)
+      assert rollout.policy == "some updated policy"
+      assert rollout.progress == 456.7
+      assert rollout.status == "some updated status"
+    end
+
+    test "update_rollout/2 with invalid data returns error changeset" do
+      rollout = rollout_fixture()
+      assert {:error, %Ecto.Changeset{}} = Core.update_rollout(rollout, @invalid_attrs)
+      assert rollout == Core.get_rollout!(rollout.id)
+    end
+
+    test "delete_rollout/1 deletes the rollout" do
+      rollout = rollout_fixture()
+      assert {:ok, %Rollout{}} = Core.delete_rollout(rollout)
+      assert_raise Ecto.NoResultsError, fn -> Core.get_rollout!(rollout.id) end
+    end
+
+    test "change_rollout/1 returns a rollout changeset" do
+      rollout = rollout_fixture()
+      assert %Ecto.Changeset{} = Core.change_rollout(rollout)
+    end
+  end
 end

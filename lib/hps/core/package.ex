@@ -3,7 +3,7 @@ defmodule HPS.Core.Package do
 
   use Ecto.Schema
   import Ecto.Changeset
-  alias HPS.Core.{Product, File}
+  alias HPS.Core.{Product, File, Rollout}
   alias Hyder.Util.Zip
 
   schema "packages" do
@@ -13,6 +13,7 @@ defmodule HPS.Core.Package do
 
     belongs_to(:product, Product)
     has_many(:files, File, on_delete: :delete_all, on_replace: :delete)
+    has_one(:rollout, Rollout, on_delete: :delete_all)
 
     timestamps()
   end

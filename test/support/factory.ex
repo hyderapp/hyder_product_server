@@ -3,7 +3,7 @@ defmodule HPS.Factory do
 
   use ExMachina.Ecto, repo: HPS.Repo
 
-  alias HPS.Core.{Product, Package}
+  alias HPS.Core.{Product, Package, Rollout}
 
   def product_factory do
     %Product{
@@ -22,6 +22,12 @@ defmodule HPS.Factory do
   end
 
   def rollout_factory do
+    %Rollout{
+      status: "ready",
+      progress: 0.0,
+      policy: "default",
+      previous_version: nil
+    }
   end
 
   def upload_fixture() do
