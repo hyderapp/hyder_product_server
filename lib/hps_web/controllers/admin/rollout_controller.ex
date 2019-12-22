@@ -58,12 +58,16 @@ defmodule HPSWeb.Admin.RolloutController do
     end
   end
 
+  @doc """
+  DELETE /products/{id}/rollout
+
+  Rollback current rollout.
+  """
   def rollback_current(conn, _params) do
     with {:rollout, %Rollout{} = rollout} <-
            {:rollout, Core.current_rollout(conn.assigns.product)},
-         {:ok, rollout} <- Core.rollback(rollout) do
-      conn
-      |> render("show.json", rollout: rollout)
+         {:ok, _} <- Core.rollback(rollout) do
+      json(conn, %{success: true})
     else
       {:rollout, ni} ->
         {:error, :not_found}

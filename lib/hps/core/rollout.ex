@@ -38,13 +38,24 @@ defmodule HPS.Core.Rollout do
     )
   end
 
-  @doc false
+  @doc """
+  Generate a changeset for updating a rollout.
+
+  Only `progress` attribute is allowed to update by user.
+
+  If progress is changed from 0.0 to any number less than 1.0,
+  the package associated with will go online.
+
+  Furthermore, you can't decrease progress to a lower number.
+  If that happens, you may want to use `rollback_changeset`
+  instead.
+  """
   def update_changeset(rollout, attrs) do
     only_forward = fn :progress, p ->
       if p <= rollout.progress do
         [
           progress:
-            "can only be increased, if you want to decrease it, you may want to use rollback changeset instead"
+            "can only be increased, if you want to decrease it, you may want to use rollback_changeset instead"
         ]
       else
         []
@@ -60,6 +71,9 @@ defmodule HPS.Core.Rollout do
     |> update_package()
     |> update_status()
   end
+
+  # if a rollout has never been applied, the package is not needed to change
+  defp update_package(%{data: %{status: "ready"}} = changeset), do: changeset
 
   defp update_package(%{valid?: true, changes: %{progress: p}} = changeset) do
     changeset
@@ -85,14 +99,4 @@ defmodule HPS.Core.Rollout do
   end
 
   defp update_status(changeset), do: changeset
-
-  @doc false
-  def rollback_changeset(rollout) do
-    rollout
-    |> Repo.preload(:package)
-    |> cast(%{}, [])
-    |> put_change(:status, "rollback")
-    |> put_change(:progress, 0.0)
-    |> update_package()
-  end
 end

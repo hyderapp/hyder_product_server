@@ -5,6 +5,7 @@ defmodule HPS.Core do
 
   alias HPS.Core.Product
   alias HPS.Core.Package
+  alias HPS.Core.Policy
   alias HPS.Repo
 
   import Ecto.Query, only: [from: 2]
@@ -158,6 +159,11 @@ defmodule HPS.Core do
   """
   def get_package!(id), do: Repo.get!(Package, id)
 
+  @doc """
+  Get a package from a product by its version.
+  """
+  def get_package_by_version(_, nil), do: {:error, :not_found}
+
   def get_package_by_version(%Product{id: id}, version),
     do: get_package_by_version(id, version)
 
@@ -170,6 +176,21 @@ defmodule HPS.Core do
 
       %Package{} = package ->
         {:ok, package}
+    end
+  end
+
+  @doc """
+  Get a package from a product by its version.
+  Raise an error if not found.
+  """
+  def get_package_by_version!(product, version) do
+    get_package_by_version(product, version)
+    |> case do
+      {:ok, package} ->
+        package
+
+      {:error, reason} ->
+        raise(reason)
     end
   end
 
@@ -387,20 +408,30 @@ defmodule HPS.Core do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_rollout(%Product{} = product, %Package{} = package) do
-    attrs = %{
+  def create_rollout(%Product{} = product, %Package{} = package, policy \\ "default") do
+    rollout = %Rollout{
+      policy: policy,
+      product: product,
       product_id: product.id,
+      package: package,
       package_id: package.id,
       target_version: package.version,
-      previous_version: product_rollouted_version(product)
+      previous_version: product_current_version(product)
     }
 
-    %Rollout{}
-    |> Rollout.create_changeset(attrs)
-    |> Repo.insert()
+    {insert, standout, drawback} = Policy.up_strategy(policy, rollout)
+
+    Repo.transaction(fn ->
+      standout.(rollout)
+      drawback.(rollout)
+      insert.(rollout)
+    end)
   end
 
-  defp product_rollouted_version(product) do
+  @doc """
+  Get product's current online package version.
+  """
+  def product_current_version(product) do
     case current_rollout(product) do
       nil ->
         nil
@@ -459,28 +490,25 @@ defmodule HPS.Core do
   ## Examples
 
       iex> rollback(rollout)
-      {:ok, %Rollout{}}
+      :ok
 
       iex> rollback(rollout)
       {:error, %Ecto.Changeset{}}
 
   """
   def rollback(%Rollout{} = rollout) do
-    rollout
-    |> Rollout.rollback_changeset()
-    |> Repo.update()
+    rollout = Repo.preload(rollout, :package)
+    {del, standout, drawback} = Policy.down_strategy(rollout.policy, rollout)
+
+    Repo.transaction(fn ->
+      standout.(rollout)
+      drawback.(rollout)
+      del.(rollout)
+    end)
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking rollout changes.
-
-  ## Examples
-
-      iex> change_rollout(rollout)
-      %Ecto.Changeset{source: %Rollout{}}
-
-  """
-  def change_rollout(%Rollout{} = rollout) do
-    Rollout.changeset(rollout, %{})
+  def delete_rollout(%Rollout{} = rollout) do
+    rollout
+    |> Repo.delete()
   end
 end

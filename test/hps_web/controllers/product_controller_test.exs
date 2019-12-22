@@ -2,7 +2,6 @@ defmodule HPSWeb.ProductControllerTest do
   use HPSWeb.ConnCase
 
   alias HPS.Core
-  alias HPS.Core.Product
 
   import HPS.Factory
 
@@ -25,15 +24,17 @@ defmodule HPSWeb.ProductControllerTest do
       expect = [
         %{
           "name" => "app1",
-          "online_packages" => []
+          "online_packages" => [],
+          "title" => "fancy product description"
         },
         %{
           "name" => "app2",
-          "online_packages" => []
+          "online_packages" => [],
+          "title" => "fancy product description"
         }
       ]
 
-      assert expect = json_response(conn, 200)["data"]
+      assert ^expect = json_response(conn, 200)["data"]
     end
 
     test "scoped by namespace", %{conn: conn} do

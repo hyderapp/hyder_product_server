@@ -3,15 +3,8 @@ defmodule HPSWeb.PackageControllerTest do
   import HPS.Factory
   import Routes
 
-  alias HPS.Core
-  alias HPS.Core.Package
-
   @create_attrs %{
     version: "1.0.0"
-  }
-
-  @update_attrs %{
-    version: "1.2.0"
   }
 
   @invalid_attrs %{version: nil}

@@ -29,22 +29,22 @@ defmodule HPS.Store.Product do
   #  callbacks
   # ----------------------
   def init(_) do
-    if Mix.env() == :test do
-      {:ok, []}
-    else
-      {:ok, reload()}
-    end
+    {:ok, reload()}
   end
 
   def handle_call(:list, _from, state), do: {:reply, state, state}
 
   def handle_cast(:refresh, _state), do: {:noreply, reload()}
 
-  defp reload() do
-    HPS.Core.list_products()
-    |> HPS.Repo.preload(online_packages: :files)
-    |> Enum.map(fn %{online_packages: packages} = product ->
-      Map.delete(%{product | packages: packages}, :online_packages)
-    end)
+  if Mix.env() == :test do
+    defp reload(), do: []
+  else
+    defp reload() do
+      HPS.Core.list_products()
+      |> HPS.Repo.preload(online_packages: :files)
+      |> Enum.map(fn %{online_packages: packages} = product ->
+        Map.delete(%{product | packages: packages}, :online_packages)
+      end)
+    end
   end
 end

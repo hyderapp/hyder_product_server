@@ -41,8 +41,8 @@ defmodule HPSWeb.RolloutControllerTest do
 
       assert %{
                "policy" => "default",
-               "progress" => 0.0,
-               "status" => "ready"
+               "progress" => 1.0,
+               "status" => "done"
              } = json_response(conn, 200)["data"]
     end
 
@@ -68,8 +68,8 @@ defmodule HPSWeb.RolloutControllerTest do
 
       assert %{
                "policy" => "default",
-               "progress" => 0.0,
-               "status" => "ready",
+               "progress" => 1.0,
+               "status" => "done",
                "target_version" => "2.5.0",
                "previous_version" => "1.0.0"
              } = json_response(conn, 201)["data"]
@@ -77,67 +77,6 @@ defmodule HPSWeb.RolloutControllerTest do
 
     test "renders errors when data is invalid", %{conn: conn, product: product} do
       conn = post(conn, Routes.product_rollout_path(conn, :create, product.name), [])
-
-      assert json_response(conn, 422)["errors"] != %{}
-    end
-  end
-
-  describe "update rollout" do
-    setup [:create_rollout]
-
-    test "renders rollout when data is valid", %{
-      conn: conn,
-      product: product,
-      target_version: version
-    } do
-      conn =
-        patch(conn, Routes.product_rollout_path(conn, :update, product.name, version),
-          progress: 0.5
-        )
-
-      assert json_response(conn, 200)["success"]
-      assert %{"progress" => 0.5} = json_response(conn, 200)["data"]
-
-      conn = get(conn, Routes.product_rollout_path(conn, :show, product.name, version))
-
-      assert %{
-               "progress" => 0.5,
-               "status" => "active",
-               "done_at" => nil
-             } = json_response(conn, 200)["data"]
-    end
-
-    test "update status to `done` when progress is 1.0", %{
-      conn: conn,
-      product: product,
-      target_version: version
-    } do
-      conn =
-        patch(conn, Routes.product_rollout_path(conn, :update, product.name, version),
-          progress: 1.0
-        )
-
-      assert json_response(conn, 200)["success"]
-      assert %{"progress" => 1.0, "status" => "done"} = json_response(conn, 200)["data"]
-    end
-
-    test "put package online when update progress", %{
-      conn: conn,
-      product: product,
-      target_version: version
-    } do
-      patch(conn, Routes.product_rollout_path(conn, :update, product.name, version), progress: 0.5)
-
-      assert {:ok, %{online: true}} = Core.get_package_by_version(product, version)
-    end
-
-    test "renders errors when data is invalid", %{
-      conn: conn,
-      product: product,
-      target_version: version
-    } do
-      conn =
-        put(conn, Routes.product_rollout_path(conn, :update, product.name, version), progress: 2.0)
 
       assert json_response(conn, 422)["errors"] != %{}
     end
@@ -183,9 +122,9 @@ defmodule HPSWeb.RolloutControllerTest do
 
       conn = delete(conn, Routes.product_rollback_path(conn, :rollback_current, product.name))
 
-      assert %{"status" => "rollback", "target_version" => ^version} =
-               json_response(conn, 200)["data"]
+      assert json_response(conn, 200)["success"]
 
+      assert Core.get_rollout_by_version(product, version) == nil
       assert {:ok, %{online: false}} = Core.get_package_by_version(product, version)
     end
   end
