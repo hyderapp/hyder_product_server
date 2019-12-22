@@ -189,11 +189,5 @@ defmodule HPS.CoreTest do
       assert {:error, %Ecto.Changeset{}} = Core.update_rollout(rollout, %{progress: 2.0})
       assert %{progress: 0.0} = Core.get_rollout!(rollout.id)
     end
-
-    test "delete_rollout/1 deletes the rollout" do
-      rollout = rollout_fixture()
-      assert {:ok, %Rollout{}} = Core.delete_rollout(rollout)
-      assert_raise Ecto.NoResultsError, fn -> Core.get_rollout!(rollout.id) end
-    end
   end
 end

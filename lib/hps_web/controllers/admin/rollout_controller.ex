@@ -50,12 +50,11 @@ defmodule HPSWeb.Admin.RolloutController do
     end
   end
 
-  def delete(conn, %{"id" => id}) do
-    rollout = Core.get_rollout!(id)
-
-    with {:ok, %Rollout{}} <- Core.delete_rollout(rollout) do
-      send_resp(conn, :no_content, "")
-    end
+  def delete(conn, _params) do
+    json(conn, %{
+      success: false,
+      apiMessage: "this api is not implemented yet and always return failure."
+    })
   end
 
   @doc """
@@ -69,7 +68,7 @@ defmodule HPSWeb.Admin.RolloutController do
          {:ok, _} <- Core.rollback(rollout) do
       json(conn, %{success: true})
     else
-      {:rollout, ni} ->
+      {:rollout, nil} ->
         {:error, :not_found}
     end
   end

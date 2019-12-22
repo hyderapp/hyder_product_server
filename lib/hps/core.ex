@@ -73,14 +73,7 @@ defmodule HPS.Core do
     %Product{}
     |> Product.create_changeset(attrs)
     |> Repo.insert()
-    |> case do
-      {:ok, _} = ret ->
-        HPS.Store.Product.refresh()
-        ret
-
-      ret ->
-        ret
-    end
+    |> refresh_store()
   end
 
   @doc """
@@ -255,8 +248,8 @@ defmodule HPS.Core do
     |> Repo.update()
     |> case do
       {:ok, package} ->
-        HPS.Store.Product.refresh()
         {:ok, save_archive(package.product, package)}
+        |> refresh_store()
 
       other ->
         other
@@ -357,6 +350,7 @@ defmodule HPS.Core do
       drawback.(rollout)
       insert.(rollout)
     end)
+    |> refresh_store()
   end
 
   @doc """
@@ -436,10 +430,23 @@ defmodule HPS.Core do
       drawback.(rollout)
       del.(rollout)
     end)
+    |> refresh_store()
   end
 
-  def delete_rollout(%Rollout{} = rollout) do
-    rollout
-    |> Repo.delete()
+  defp refresh_store(ret) do
+    refresh = &HPS.Store.Product.refresh/0
+
+    case ret do
+      :ok ->
+        refresh.()
+
+      {:ok, _} ->
+        refresh.()
+
+      _ ->
+        nil
+    end
+
+    ret
   end
 end
