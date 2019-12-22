@@ -23,4 +23,10 @@ defmodule HPS.Core.File do
     |> cast_assoc(:package)
     |> validate_required([:path, :digest, :size, :package_id])
   end
+
+  def to_hyder_struct(%__MODULE__{} = file) do
+    Map.from_struct(file)
+    |> Map.take([:digest, :path, :size])
+    |> Hyder.File.__struct__()
+  end
 end

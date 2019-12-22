@@ -15,7 +15,7 @@ defmodule HPS.Core.Rollout do
     field(:status, :string, default: "ready")
     field(:target_version, :string)
     field(:previous_version, :string)
-    field(:done_at, :utc_datetime)
+    field(:done_at, :utc_datetime_usec)
 
     belongs_to(:product, Product)
     belongs_to(:package, Package)
@@ -102,7 +102,7 @@ defmodule HPS.Core.Rollout do
   defp update_package(changeset), do: changeset
 
   defp update_status(%{valid?: true, changes: %{progress: 1.0}} = changeset) do
-    now = DateTime.utc_now() |> DateTime.truncate(:second)
+    now = DateTime.utc_now() |> DateTime.truncate(:microsecond)
 
     changeset
     |> put_change(:status, "done")
@@ -115,4 +115,9 @@ defmodule HPS.Core.Rollout do
   end
 
   defp update_status(changeset), do: changeset
+
+  def to_hyder_struct(%__MODULE__{} = rollout) do
+    Map.from_struct(rollout)
+    |> Map.take([:status, :progress, :done_at, :policy])
+  end
 end

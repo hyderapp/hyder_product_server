@@ -56,7 +56,7 @@ defmodule HPSWeb.RolloutControllerTest do
         target_version: "1.0.0",
         progress: 1.0,
         status: "done",
-        done_at: DateTime.utc_now() |> DateTime.truncate(:second)
+        done_at: DateTime.utc_now() |> DateTime.truncate(:microsecond)
       )
 
       package = insert(:package, product: product, version: "2.5.0")
@@ -93,7 +93,7 @@ defmodule HPSWeb.RolloutControllerTest do
 
     test "it returns the most recent done rollout", %{conn: conn, product: product} do
       p1 = insert(:package, product: product, version: "1.1.0", online: false)
-      t = DateTime.utc_now() |> DateTime.add(-3600, :second) |> DateTime.truncate(:second)
+      t = DateTime.utc_now() |> DateTime.add(-3600, :second) |> DateTime.truncate(:microsecond)
       release_package(product, p1, done_at: t)
 
       p2 = insert(:package, product: product, version: "1.2.0", online: true)
@@ -151,7 +151,7 @@ defmodule HPSWeb.RolloutControllerTest do
         target_version: package.version,
         status: "done",
         progress: 1.0,
-        done_at: DateTime.utc_now() |> DateTime.truncate(:second)
+        done_at: DateTime.utc_now() |> DateTime.truncate(:microsecond)
       ]
       |> Keyword.merge(opts)
 

@@ -18,6 +18,8 @@ defmodule HPS.Core.Product do
     has_many(:rollouts, Rollout)
     has_many(:done_rollouts, Rollout, where: [status: "done"])
 
+    has_many(:rolled_packages, through: [:rollouts, :package])
+
     timestamps()
   end
 
@@ -34,5 +36,14 @@ defmodule HPS.Core.Product do
     product
     |> cast(attrs, [:title])
     |> validate_required([:namespace, :name])
+  end
+
+  def to_hyder_struct(%__MODULE__{} = product) do
+    Map.from_struct(product)
+    |> Map.take([:name, :namespace, :title, :packages])
+    |> Map.update!(:packages, fn packages ->
+      Enum.map(packages, &HPS.Core.Package.to_hyder_struct/1)
+    end)
+    |> Hyder.Product.__struct__()
   end
 end

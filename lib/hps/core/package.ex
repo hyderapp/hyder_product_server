@@ -65,4 +65,14 @@ defmodule HPS.Core.Package do
   end
 
   defp auto_build_files(changeset), do: changeset
+
+  def to_hyder_struct(%__MODULE__{} = package) do
+    Map.from_struct(package)
+    |> Map.take([:version, :files, :rollout])
+    |> Map.update!(:files, fn files ->
+      Enum.map(files, &HPS.Core.File.to_hyder_struct/1)
+    end)
+    |> Map.update!(:rollout, &HPS.Core.Rollout.to_hyder_struct/1)
+    |> Hyder.Package.__struct__()
+  end
 end

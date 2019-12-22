@@ -79,7 +79,7 @@ defmodule Hyder.Product do
   end
 
   @doc """
-  Get the latest package. Returns the package with the highest version value.
+  Get the latest package. Returns the package with the latest rollout done.
 
   ## Example
 
@@ -110,16 +110,83 @@ defmodule Hyder.Product do
   """
   def latest_package(%{packages: packages}), do: latest_package(packages)
 
-  def latest_package(packages) when is_list(packages),
-    do: packages |> Enum.max_by(&Version.parse(&1.version))
+  def latest_package(packages) when is_list(packages) do
+    packages
+    |> Enum.sort_by(&Version.parse(&1.version), &>=/2)
+    |> Enum.max_by(&(&1.rollout && &1.rollout.done_at))
+  end
 
   @doc """
-  Given a list of products, return all file paths of their latest packages.
+  Given a list of products, return all file path of their latest packages.
+  Paths are uniqued based on files. This is similar to `all_files/2` but
+  only contains the path.
   """
-  def all_paths(products) do
+  def all_paths(products, base \\ %{})
+
+  def all_paths(products, base) do
+    all_files(products, base)
+    |> Enum.map(& &1.path)
+  end
+
+  @doc """
+  Given a list of products, return all files of their latest packages.
+  Files are uniqued.
+  """
+  def all_files(products, base),
+    do: _all_files(products, parse_base(base))
+
+  defp _all_files(products, []) do
     products
-    |> Stream.flat_map(fn product -> latest_package(product).files end)
-    |> Stream.map(fn %{path: path} -> path end)
+    |> Stream.flat_map(&latest_package(&1).files)
     |> Enum.uniq()
   end
+
+  defp _all_files(products, base) do
+    Enum.reduce(base, _all_files(products, []), fn {name, version}, acc ->
+      case get_files(products, name, version) do
+        nil ->
+          acc
+
+        files ->
+          acc -- files
+      end
+    end)
+  end
+
+  defp get_files(data, name, version) do
+    Enum.find_value(data, fn product ->
+      if product.name == name, do: get_files(product.packages, version)
+    end)
+  end
+
+  defp get_files(package, version) do
+    Enum.find_value(package, fn p ->
+      if p.version == version, do: p.files
+    end)
+  end
+
+  @doc """
+  Parse client base version config from string.
+
+  ## Example
+
+      iex> parse_base("home:2.3.4")
+      %{"home" => "2.3.4"}
+
+      iex> parse_base("post:1.10.5,about:1.3.1")
+      %{"post" => "1.10.5", "about" => "1.3.1"}
+
+      iex> parse_base(nil)
+      %{}
+  """
+  def parse_base(nil), do: %{}
+
+  def parse_base(str) when is_binary(str) do
+    String.split(str, ",")
+    |> Stream.map(&String.split(&1, ":"))
+    |> Stream.map(&List.to_tuple/1)
+    |> Enum.to_list()
+  end
+
+  def parse_base(base), do: base
 end

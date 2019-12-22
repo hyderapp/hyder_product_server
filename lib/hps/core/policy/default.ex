@@ -29,7 +29,7 @@ defmodule HPS.Core.Policy.Default do
     Rollout.create_changeset(%Rollout{}, Map.from_struct(rollout))
     |> Changeset.put_change(:status, "done")
     |> Changeset.put_change(:progress, 1.0)
-    |> Changeset.put_change(:done_at, DateTime.utc_now() |> DateTime.truncate(:second))
+    |> Changeset.put_change(:done_at, DateTime.utc_now())
     |> Repo.insert!()
   end
 

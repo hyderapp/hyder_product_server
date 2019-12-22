@@ -39,12 +39,15 @@ defmodule HPS.Store.Product do
   if Mix.env() == :test do
     defp reload(), do: []
   else
-    defp reload() do
-      HPS.Core.list_products()
-      |> HPS.Repo.preload(online_packages: :files)
-      |> Enum.map(fn %{online_packages: packages} = product ->
-        Map.delete(%{product | packages: packages}, :online_packages)
-      end)
-    end
+    defp reload(), do: load()
+  end
+
+  def load() do
+    HPS.Core.list_products()
+    |> HPS.Repo.preload(rolled_packages: [:files, :rollout])
+    |> Stream.map(fn %{rolled_packages: packages} = product ->
+      Map.delete(%{product | packages: packages}, :rolled_packages)
+    end)
+    |> Enum.map(&HPS.Core.Product.to_hyder_struct/1)
   end
 end

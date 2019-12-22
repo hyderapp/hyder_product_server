@@ -8,7 +8,7 @@ defmodule HPS.Repo.Migrations.CreateRollouts do
       add :status, :string, null: false
       add :target_version, :string, null: false
       add :previous_version, :string
-      add :done_at, :utc_datetime
+      add :done_at, :utc_datetime_usec
 
       add :product_id, references(:products, on_delete: :nothing)
       add :package_id, references(:packages, on_delete: :nothing)

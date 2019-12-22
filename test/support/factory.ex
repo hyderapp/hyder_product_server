@@ -3,7 +3,7 @@ defmodule HPS.Factory do
 
   use ExMachina.Ecto, repo: HPS.Repo
 
-  alias HPS.Core.{Product, Package, Rollout}
+  alias HPS.Core.{Product, Package, File, Rollout}
 
   def product_factory do
     %Product{
@@ -34,6 +34,15 @@ defmodule HPS.Factory do
     %Plug.Upload{
       path: "test/fixtures/shop-v1.0.0-df8d87ef.zip",
       filename: "shop-v1.0.0-df8d87ef.zip"
+    }
+  end
+
+  def file_factory do
+    %File{
+      digest: sequence(:digest, &"#{&1}"),
+      path: sequence(:digest, &"/test/#{&1}"),
+      size: 2048,
+      package: build(:package)
     }
   end
 end
