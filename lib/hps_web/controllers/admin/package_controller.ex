@@ -3,6 +3,7 @@ defmodule HPSWeb.Admin.PackageController do
 
   alias HPS.Core
   alias HPS.Core.{Product}
+  alias HPS.Repo
 
   action_fallback(HPSWeb.FallbackController)
 
@@ -26,9 +27,9 @@ defmodule HPSWeb.Admin.PackageController do
 
   def show(conn, %{"id" => id, "product_id" => product_id}) do
     with {:ok, product} <- fetch_product(product_id, conn),
-         {:ok, package} <- Core.get_package_by_version(product.id, id) do
+         {:ok, package} <- fetch_package(product.id, id) do
       conn
-      |> render("show.json", package: package)
+      |> render("show-with-detail.json", package: package)
     end
   end
 
@@ -46,6 +47,16 @@ defmodule HPSWeb.Admin.PackageController do
 
   defp fetch_product(id, conn) do
     Core.get_product_by_name(id, conn.assigns.namespace)
+  end
+
+  defp fetch_package(product_id, version) do
+    case Core.get_package_by_version(product_id, version) do
+      {:ok, package} ->
+        {:ok, Repo.preload(package, [:files, :rollout])}
+
+      other ->
+        other
+    end
   end
 
   defp prepare_create(params, product) do

@@ -7,6 +7,8 @@ defmodule HPS.Core.Rollout do
   alias HPS.Core.{Product, Package}
   alias HPS.Repo
 
+  @derive {Jason.Encoder, only: [:policy, :progress, :status, :previous_version, :done_at]}
+
   schema "rollouts" do
     field(:policy, :string, default: "default")
     field(:progress, :float, default: 0.0)
@@ -32,10 +34,24 @@ defmodule HPS.Core.Rollout do
       :previous_version
     ])
     |> validate_required([:policy, :progress, :product_id, :package_id, :target_version])
-    |> unsafe_validate_unique(:package_id, Repo, message: "each package can have only one rollout")
+    |> validate_diff_versions()
+    |> unsafe_validate_unique([:package_id], Repo,
+      message: "each package can have only one rollout"
+    )
     |> unsafe_validate_unique([:product_id, :target_version], Repo,
       message: "a product can have only one rollout of specific version"
     )
+  end
+
+  defp validate_diff_versions(changeset) do
+    case changeset.changes do
+      %{target_version: v, previous_version: v} ->
+        changeset
+        |> add_error(:target_version, "should not be the same with previous package version")
+
+      _ ->
+        changeset
+    end
   end
 
   @doc """

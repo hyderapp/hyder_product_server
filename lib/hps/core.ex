@@ -133,7 +133,12 @@ defmodule HPS.Core do
 
   """
   def list_packages(%Product{} = product) do
-    Repo.all(from(p in Package, where: p.product_id == ^product.id))
+    Repo.all(
+      from(p in Package,
+        where: p.product_id == ^product.id,
+        order_by: [desc: p.online, desc: p.version]
+      )
+    )
   end
 
   @doc """
@@ -343,6 +348,16 @@ defmodule HPS.Core do
       previous_version: product_current_version(product)
     }
 
+    case Rollout.create_changeset(%Rollout{}, Map.from_struct(rollout)) do
+      %{valid?: true} ->
+        create_rollout_with_policy(policy, rollout)
+
+      changeset ->
+        {:error, changeset}
+    end
+  end
+
+  defp create_rollout_with_policy(policy, rollout) do
     {insert, standout, drawback} = Policy.up_strategy(policy, rollout)
 
     Repo.transaction(fn ->

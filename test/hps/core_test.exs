@@ -176,6 +176,11 @@ defmodule HPS.CoreTest do
       assert %{online: true} = Core.get_package_by_version!(product, package.version)
     end
 
+    test "create_rollout/1 called twice on the same versions will fail" do
+      rollout = rollout_fixture()
+      assert {:error, _} = Core.create_rollout(rollout.product, rollout.package)
+    end
+
     test "update_rollout/2 with valid data updates the rollout" do
       rollout = rollout_fixture()
       assert {:ok, %Rollout{} = rollout} = Core.update_rollout(rollout, %{progress: 0.8})

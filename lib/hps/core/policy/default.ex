@@ -17,16 +17,16 @@ defmodule HPS.Core.Policy.Default do
 
   @spec up_strategy(Rollout.t()) :: {Policy.handler(), Policy.handler(), Policy.handler()}
 
-  def up_strategy(%Rollout{package: %Package{}} = rollout) do
+  def up_strategy(%Rollout{package: %Package{}}) do
     {&insert/1, &up_strategy_standout/1, &up_strategy_drawback/1}
   end
 
-  def down_strategy(%Rollout{package: %Package{}} = rollout) do
+  def down_strategy(%Rollout{package: %Package{}}) do
     {&del/1, &down_strategy_standout/1, &down_strategy_drawback/1}
   end
 
   defp insert(rollout) do
-    Rollout.create_changeset(rollout, %{})
+    Rollout.create_changeset(%Rollout{}, Map.from_struct(rollout))
     |> Changeset.put_change(:status, "done")
     |> Changeset.put_change(:progress, 1.0)
     |> Changeset.put_change(:done_at, DateTime.utc_now() |> DateTime.truncate(:second))

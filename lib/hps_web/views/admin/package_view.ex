@@ -10,6 +10,13 @@ defmodule HPSWeb.Admin.PackageView do
     %{success: true, data: render_one(package, PackageView, "package.json")}
   end
 
+  def render("show-with-detail.json", %{package: package}) do
+    %{
+      success: true,
+      data: Map.take(package, [:version, :online, :files, :rollout])
+    }
+  end
+
   def render("package.json", %{package: package}) do
     %{version: package.version, online: package.online}
   end
