@@ -1,20 +1,28 @@
-# HPS
+# Hyder Product Server
 
-To start your Phoenix server:
+This project aim to provide a product server for [hyder]() applications.
 
-  * Install dependencies with `mix deps.get`
-  * Create and migrate your database with `mix ecto.setup`
-  * Install Node.js dependencies with `cd assets && npm install`
-  * Start Phoenix endpoint with `mix phx.server`
+### Quick Start
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+#### Preparation
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+Before running the project, you need to install [Elixir]() first. There is [an official guide]() for it.
 
-## Learn more
+Optionally, you can install [docker]() for running the database in docker. This can be skipped as you wish,
+but then you may need to change `config/dev.exs` to match you database configuration.
 
-  * Official website: http://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Mailing list: http://groups.google.com/group/phoenix-talk
-  * Source: https://github.com/phoenixframework/phoenix
+#### Run the project
+
+```sh
+# start postgreSQL (optional)
+docker-compose --file docker/docker-compose.yml
+
+# run the project
+mix do deps.get, ecto.setup, phx.server
+```
+
+The server is running at [http://127.0.0.1:4000](http://127.0.0.1:4000), you can visit it your browser now.
+
+### API
+
+TODO: to be documented.
