@@ -305,7 +305,10 @@ defmodule HPS.Core do
 
   """
   def list_rollouts(%Product{} = product) do
-    from(r in Rollout, where: r.product_id == ^product.id)
+    from(r in Rollout,
+      where: r.product_id == ^product.id,
+      order_by: [desc: r.done_at, desc: r.target_version]
+    )
     |> Repo.all()
   end
 

@@ -189,6 +189,14 @@ defmodule HPS.CoreTest do
       assert rollout.status == "active"
     end
 
+    test "update_rollout/2 will set rollout status to `done` if progress == 1.0" do
+      rollout = rollout_fixture()
+      assert {:ok, %Rollout{} = rollout} = Core.update_rollout(rollout, %{progress: "1"})
+      assert rollout.progress == 1.0
+      assert rollout.status == "done"
+      assert rollout.done_at
+    end
+
     test "update_rollout/2 with invalid data returns error changeset" do
       rollout = rollout_fixture()
       assert {:error, %Ecto.Changeset{}} = Core.update_rollout(rollout, %{progress: 2.0})

@@ -109,9 +109,11 @@ defmodule HPS.Core.Rollout do
     |> put_change(:done_at, now)
   end
 
-  defp update_status(%{valid?: true} = changeset) do
+  defp update_status(%{valid?: true, changes: %{progress: p}} = changeset)
+       when p > 0 and p < 1.0 do
     changeset
     |> put_change(:status, "active")
+    |> put_change(:done_at, nil)
   end
 
   defp update_status(changeset), do: changeset
