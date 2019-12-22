@@ -274,6 +274,7 @@ defmodule HPS.Core do
   """
   def delete_package(%Package{} = package) do
     Repo.delete(package)
+    |> refresh_store()
   end
 
   @doc """
