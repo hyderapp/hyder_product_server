@@ -22,11 +22,22 @@ defmodule HPSWeb.Router do
     )
   end
 
+  pipeline :health do
+    plug(Plug.Logger, log: :debug)
+  end
+
   scope "/", HPSWeb do
     pipe_through(:browser)
 
     get("/", PageController, :index)
     get("/down/*package", DownloadController, :show)
+  end
+
+  scope "/health", HPSWeb do
+    pipe_through(:health)
+
+    get("/live", HealthController, :show, log: false)
+    get("/ready", HealthController, :show, log: false)
   end
 
   scope "/doc" do
