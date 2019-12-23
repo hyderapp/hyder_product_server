@@ -13,30 +13,27 @@ defmodule HyderProductTest do
       p1 = insert(:package, product: product)
 
       _file_list_1 =
-        for _ <- 1..3 do
-          insert(:file, package: p1)
+        for i <- 1..3 do
+          insert(:file, package: p1, path: "p1/#{i}/test.html")
         end
 
       p2 = insert(:package, product: product, online: true)
 
       _file_list_2 =
-        for _ <- 1..3 do
-          insert(:file, package: p2)
+        for i <- 1..3 do
+          insert(:file, package: p2, path: "p2/#{i}/test.html")
         end
 
-      common_file = %{digest: "hello", path: "/hello"}
+      invalid = %{digest: "hello", path: "/hello.html"}
 
-      insert(:file, Enum.into(common_file, %{package: p1}))
-      insert(:file, Enum.into(common_file, %{package: p2}))
+      insert(:file, Enum.into(invalid, %{package: p1}))
+      insert(:file, Enum.into(invalid, %{package: p2}))
 
       HPS.Core.create_rollout(product, p1)
       HPS.Core.create_rollout(product, p2)
 
       products = HPS.Store.Product.load()
-      paths = all_paths(products, %{product.name => p1.version})
-      assert(length(paths) == 3)
-
-      assert length(all_paths(products)) == 4
+      assert all_paths(products) == ~w[/p2/1/ /p2/2/ /p2/3/]
     end
   end
 end

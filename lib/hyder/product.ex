@@ -121,48 +121,26 @@ defmodule Hyder.Product do
   Paths are uniqued based on files. This is similar to `all_files/2` but
   only contains the path.
   """
-  def all_paths(products, base \\ %{})
-
-  def all_paths(products, base) do
-    all_files(products, base)
-    |> Enum.map(& &1.path)
+  def all_paths(products) do
+    all_files(products)
+    |> Stream.map(&format_path(&1.path))
+    |> Stream.reject(&(&1 in ["/", "/."]))
+    |> Stream.map(&(&1 <> "/"))
+    |> Enum.uniq()
   end
 
   @doc """
   Given a list of products, return all files of their latest packages.
   Files are uniqued.
   """
-  def all_files(products, base),
-    do: _all_files(products, parse_base(base))
-
-  defp _all_files(products, []) do
+  defp all_files(products) do
     products
     |> Stream.flat_map(&latest_package(&1).files)
     |> Enum.uniq()
   end
 
-  defp _all_files(products, base) do
-    Enum.reduce(base, _all_files(products, []), fn {name, version}, acc ->
-      case get_files(products, name, version) do
-        nil ->
-          acc
-
-        files ->
-          acc -- files
-      end
-    end)
-  end
-
-  defp get_files(data, name, version) do
-    Enum.find_value(data, fn product ->
-      if product.name == name, do: get_files(product.packages, version)
-    end)
-  end
-
-  defp get_files(package, version) do
-    Enum.find_value(package, fn p ->
-      if p.version == version, do: p.files
-    end)
+  defp format_path(p) do
+    Path.join("/", Path.dirname(p))
   end
 
   @doc """

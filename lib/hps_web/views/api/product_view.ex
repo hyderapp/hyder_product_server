@@ -26,6 +26,8 @@ defmodule HPSWeb.API.ProductView do
       version: version,
       full_download_url: full_download_url(product.name, version),
       full_download_digest: nil,
+      download_url: full_download_url(product.name, version),
+      download_digest: nil,
       remove: []
     }
   end

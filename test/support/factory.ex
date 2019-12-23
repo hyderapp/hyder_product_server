@@ -40,7 +40,7 @@ defmodule HPS.Factory do
   def file_factory do
     %File{
       digest: sequence(:digest, &"#{&1}"),
-      path: sequence(:digest, &"/test/#{&1}"),
+      path: sequence(:digest, &"/#{&1}/test/"),
       size: 2048,
       package: build(:package)
     }
