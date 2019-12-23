@@ -3,25 +3,21 @@ defmodule HPSWeb.DownloadController do
 
   use HPSWeb, :controller
 
+  require Logger
+
   def show(conn, %{"package" => [path]}) do
     file = zip_path(path)
 
     if File.exists?(file) do
       send_download(conn, {:file, file})
     else
+      Logger.warn("package not found: #{file}")
+
       conn
       |> put_status(:not_found)
       |> text("not found")
     end
   end
 
-  defp zip_path(file), do: Path.join(storage_path(), file)
-
-  defp storage_path(),
-    do:
-      Application.get_env(
-        :hps,
-        :archive_storage_path,
-        Path.join([:code.priv_dir(:hps), "archive"])
-      )
+  defp zip_path(file), do: Path.join(HPS.Core.archive_storage_dir(), file)
 end

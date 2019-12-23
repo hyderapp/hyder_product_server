@@ -236,7 +236,15 @@ defmodule HPS.Core do
   end
 
   def archive_path(name, version) do
-    Path.join([:code.priv_dir(:hps), "archive", "#{name}-#{version}.zip"])
+    Path.join([archive_storage_dir(), "#{name}-#{version}.zip"])
+  end
+
+  def archive_storage_dir() do
+    Application.get_env(
+      :hps,
+      :archive_storage_path,
+      Path.join([:code.priv_dir(:hps), "archive"])
+    )
   end
 
   @doc """
