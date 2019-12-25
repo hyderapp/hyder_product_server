@@ -6,18 +6,33 @@ defmodule HPSWeb.DownloadController do
   require Logger
 
   def show(conn, %{"package" => [path]}) do
-    file = zip_path(path)
+    [name, version] =
+      path
+      |> String.trim_trailing(".zip")
+      |> String.split("-", parts: 2)
 
-    if File.exists?(file) do
-      send_download(conn, {:file, file})
+    product = %{name: name, namespace: conn.assigns.namespace}
+    package = %{product: product, version: version}
+
+    HPS.Core.Storage.locate_archive(package)
+    |> case do
+      {:file, file} ->
+        send_file(conn, file)
+
+      {:url, url} ->
+        redirect(conn, external: url)
+    end
+  end
+
+  defp send_file(conn, path) do
+    if File.exists?(path) do
+      send_download(conn, {:file, path})
     else
-      Logger.warn("package not found: #{file}")
+      Logger.warn("package not found: #{path}")
 
       conn
       |> put_status(:not_found)
       |> text("not found")
     end
   end
-
-  defp zip_path(file), do: Path.join(HPS.Core.archive_storage_dir(), file)
 end

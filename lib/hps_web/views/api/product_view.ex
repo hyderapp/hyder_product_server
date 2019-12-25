@@ -20,20 +20,27 @@ defmodule HPSWeb.API.ProductView do
 
   def render("product.json", %{product: product}) do
     version = latest_package(product).version
+    %{name: name, namespace: ns} = product
 
     %{
-      name: product.name,
+      name: name,
       version: version,
-      full_download_url: full_download_url(product.name, version),
+      full_download_url: full_download_url(name, version, ns),
       full_download_digest: nil,
-      download_url: full_download_url(product.name, version),
+      download_url: full_download_url(name, version, ns),
       download_digest: nil,
       remove: []
     }
   end
 
-  defp full_download_url(product, version),
+  defp full_download_url(product, version, "default"),
     do: Routes.download_url(HPSWeb.Endpoint, :show, [product_package_name(product, version)])
+
+  defp full_download_url(product, version, ns),
+    do:
+      Routes.download_url(HPSWeb.Endpoint, :show, [product_package_name(product, version)],
+        namespace: ns
+      )
 
   defp product_package_name(product, version) do
     "#{product}-#{version}.zip"

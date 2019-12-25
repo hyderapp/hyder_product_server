@@ -3,9 +3,7 @@ defmodule HPS.Core do
   Hyder Package Server.
   """
 
-  alias HPS.Core.Product
-  alias HPS.Core.Package
-  alias HPS.Core.Policy
+  alias HPS.Core.{Product, Package, Policy, Storage}
   alias HPS.Repo
 
   import Ecto.Query, only: [from: 2]
@@ -226,27 +224,6 @@ defmodule HPS.Core do
     |> Repo.insert()
   end
 
-  def save_archive(product, package) do
-    path = archive_path(product.name, package.version)
-
-    with :ok <- File.mkdir_p(Path.dirname(path)),
-         :ok <- File.write(path, package.archive) do
-      package
-    end
-  end
-
-  def archive_path(name, version) do
-    Path.join([archive_storage_dir(), "#{name}-#{version}.zip"])
-  end
-
-  def archive_storage_dir() do
-    Application.get_env(
-      :hps,
-      :archive_storage_path,
-      Path.join([:code.priv_dir(:hps), "archive"])
-    )
-  end
-
   @doc """
   Update a package.
   """
@@ -260,8 +237,11 @@ defmodule HPS.Core do
     |> Repo.update()
     |> case do
       {:ok, package} ->
-        {:ok, save_archive(package.product, package)}
-        |> refresh_store()
+        :ok =
+          Storage.save_archive(package)
+          |> refresh_store()
+
+        {:ok, package}
 
       other ->
         other
