@@ -129,10 +129,6 @@ defmodule Hyder.Product do
     |> Enum.uniq()
   end
 
-  @doc """
-  Given a list of products, return all files of their latest packages.
-  Files are uniqued.
-  """
   defp all_files(products) do
     products
     |> Stream.flat_map(&latest_package(&1).files)
