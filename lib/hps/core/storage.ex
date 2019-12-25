@@ -5,12 +5,12 @@ defmodule HPS.Core.Storage do
 
   alias HPS.Core.Package
 
+  @doc """
+  Persist archive of a package.
+  """
+  @spec save_archive(Package.t()) :: :ok | {:error, term}
   def save_archive(package) do
     apply(engine(), :save_archive, [package])
-  end
-
-  defp engine do
-    __MODULE__.Local
   end
 
   @doc """
@@ -26,14 +26,16 @@ defmodule HPS.Core.Storage do
     apply(engine(), :locate_archive, [package])
   end
 
+  defp engine, do: Application.get_env(:hps, :storage, __MODULE__.Local)
+
   defmodule Local do
     @moduledoc """
     Default storage engine with ability of interacting with local file system.
     """
     require Logger
 
-    def save_archive(%{archive: archive, product: product, version: version} = package) do
-      path = archive_path(product, version)
+    def save_archive(%{archive: archive} = package) do
+      path = archive_path(package)
 
       Logger.info("write archive to #{path}")
 
@@ -43,8 +45,13 @@ defmodule HPS.Core.Storage do
       end
     end
 
-    defp archive_path(%{name: name, namespace: ns} = product, version) do
-      Path.join([archive_storage_dir(), ns, name, zip_file_name(version)])
+    def locate_archive(package) do
+      %{product: %{namespace: ns, name: name}, version: version} = package
+      {:file, Path.join([archive_storage_dir(), ns, name, "#{version}.zip"])}
+    end
+
+    defp archive_path(%{product: %{name: name, namespace: ns}, version: version}) do
+      Path.join([archive_storage_dir(), ns, name, "#{version}.zip"])
     end
 
     defp archive_storage_dir() do
@@ -53,15 +60,6 @@ defmodule HPS.Core.Storage do
         :archive_storage_path,
         Path.join([:code.priv_dir(:hps), "archive"])
       )
-    end
-
-    defp zip_file_name(version) do
-      "#{version}.zip"
-    end
-
-    def locate_archive(package) do
-      %{product: %{namespace: ns, name: name}, version: version} = package
-      {:file, Path.join([archive_storage_dir(), ns, name, zip_file_name(version)])}
     end
   end
 end

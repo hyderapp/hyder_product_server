@@ -28,7 +28,7 @@ defmodule HPSWeb.DownloadController do
     if File.exists?(path) do
       send_download(conn, {:file, path})
     else
-      Logger.warn("package not found: #{path}")
+      Logger.error("package not found: #{path}")
 
       conn
       |> put_status(:not_found)
