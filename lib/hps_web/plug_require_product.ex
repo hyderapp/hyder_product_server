@@ -12,7 +12,7 @@ defmodule HPSWeb.RequireProduct do
   def init(opts), do: opts
 
   def call(conn, _opts) do
-    case conn.params["product_id"] do
+    case conn.params["product_name"] do
       nil ->
         conn
         |> put_status(:expectation_failed)

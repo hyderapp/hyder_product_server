@@ -20,10 +20,11 @@ defmodule HPSWeb.Admin.ProductController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
+  def show(conn, %{"name" => name}) do
     preload = :online_packages
 
-    with {:ok, product} <- Core.get_product_by_name(id, conn.assigns.namespace, preload: preload) do
+    with {:ok, product} <-
+           Core.get_product_by_name(name, conn.assigns.namespace, preload: preload) do
       conn
       |> render("show.json", product: product)
     end

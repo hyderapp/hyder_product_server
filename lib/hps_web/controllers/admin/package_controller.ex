@@ -7,16 +7,16 @@ defmodule HPSWeb.Admin.PackageController do
 
   action_fallback(HPSWeb.FallbackController)
 
-  def index(conn, %{"product_id" => product_id}) do
-    with {:ok, %Product{} = product} <- fetch_product(product_id, conn),
+  def index(conn, %{"product_name" => product_name}) do
+    with {:ok, %Product{} = product} <- fetch_product(product_name, conn),
          packages <- Core.list_packages(product) do
       conn
       |> render("index.json", packages: packages)
     end
   end
 
-  def create(conn, %{"product_id" => product_id} = params) do
-    with {:ok, product} <- fetch_product(product_id, conn),
+  def create(conn, %{"product_name" => product_name} = params) do
+    with {:ok, product} <- fetch_product(product_name, conn),
          {:ok, params} <- prepare_create(params, product),
          {:ok, package} <- Core.create_or_update_package(product, params) do
       conn
@@ -25,17 +25,17 @@ defmodule HPSWeb.Admin.PackageController do
     end
   end
 
-  def show(conn, %{"id" => id, "product_id" => product_id}) do
-    with {:ok, product} <- fetch_product(product_id, conn),
-         {:ok, package} <- fetch_package(product.id, id) do
+  def show(conn, %{"version" => version, "product_name" => product_name}) do
+    with {:ok, product} <- fetch_product(product_name, conn),
+         {:ok, package} <- fetch_package(product.id, version) do
       conn
       |> render("show-with-detail.json", package: package)
     end
   end
 
-  def delete(conn, %{"id" => id, "product_id" => product_id}) do
-    with {:ok, product} <- fetch_product(product_id, conn),
-         {:ok, package} <- Core.get_package_by_version(product.id, id),
+  def delete(conn, %{"version" => version, "product_name" => product_name}) do
+    with {:ok, product} <- fetch_product(product_name, conn),
+         {:ok, package} <- Core.get_package_by_version(product.id, version),
          {:ok, _} <- Core.delete_package(package) do
       conn
       |> render("delete.json", [])
@@ -45,8 +45,8 @@ defmodule HPSWeb.Admin.PackageController do
     end
   end
 
-  defp fetch_product(id, conn) do
-    Core.get_product_by_name(id, conn.assigns.namespace)
+  defp fetch_product(version, conn) do
+    Core.get_product_by_name(version, conn.assigns.namespace)
   end
 
   defp fetch_package(product_id, version) do

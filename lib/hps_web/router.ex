@@ -52,9 +52,13 @@ defmodule HPSWeb.Router do
   scope "/admin", HPSWeb.Admin do
     pipe_through(:api)
 
-    resources("/products", ProductController, except: [:new, :edit]) do
-      resources("/packages", PackageController, except: [:new, :edit])
-      resources("/rollouts", RolloutController, except: [:new, :edit, :delete])
+    resources("/products", ProductController, except: [:new, :edit], param: "name") do
+      resources("/packages", PackageController, except: [:new, :edit], param: "version")
+
+      resources("/rollouts", RolloutController,
+        except: [:new, :edit, :delete],
+        param: "target_version"
+      )
 
       get("/rollout", RolloutController, :show_current)
       delete("/rollout", RolloutController, :rollback_current, as: :rollback)

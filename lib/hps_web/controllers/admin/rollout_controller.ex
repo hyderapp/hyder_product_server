@@ -33,8 +33,8 @@ defmodule HPSWeb.Admin.RolloutController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    rollout = Core.get_rollout_by_version(conn.assigns.product, id)
+  def show(conn, %{"target_version" => target_version}) do
+    rollout = Core.get_rollout_by_version(conn.assigns.product, target_version)
     render(conn, "show.json", rollout: rollout)
   end
 
@@ -43,8 +43,9 @@ defmodule HPSWeb.Admin.RolloutController do
     render(conn, "show.json", rollout: rollout)
   end
 
-  def update(conn, %{"id" => id} = params) do
-    with %Rollout{} = rollout <- Core.get_rollout_by_version(conn.assigns.product, id),
+  def update(conn, %{"target_version" => target_version} = params) do
+    with %Rollout{} = rollout <-
+           Core.get_rollout_by_version(conn.assigns.product, target_version),
          {:ok, %Rollout{} = rollout} <- Core.update_rollout(rollout, params) do
       render(conn, "show.json", rollout: rollout)
     end
@@ -58,7 +59,7 @@ defmodule HPSWeb.Admin.RolloutController do
   end
 
   @doc """
-  DELETE /products/{id}/rollout
+  DELETE /products/{name}/rollout
 
   Rollback current rollout.
   """
