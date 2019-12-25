@@ -19,6 +19,10 @@ defmodule HPS.Core do
   """
   def list_products(namespace \\ "default")
 
+  def list_products(:all) do
+    Repo.all(Product)
+  end
+
   def list_products(namespace) do
     Repo.all(from(p in Product, where: p.namespace == ^namespace))
   end

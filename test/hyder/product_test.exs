@@ -8,7 +8,7 @@ defmodule HyderProductTest do
   doctest Product
 
   describe "all_paths/2" do
-    test "it return only modified paths from base" do
+    test "it returns only modified paths from base" do
       product = insert(:product)
       p1 = insert(:package, product: product)
 

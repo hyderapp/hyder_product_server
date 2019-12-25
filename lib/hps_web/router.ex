@@ -64,7 +64,7 @@ defmodule HPSWeb.Router do
   scope "/api", HPSWeb.API do
     pipe_through(:api)
 
-    resources("/products", ProductController, only: [:index])
+    resources("/products", ProductController, only: [:index], as: :products)
   end
 
   def swagger_info do

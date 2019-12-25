@@ -43,7 +43,7 @@ defmodule HPS.Store.Product do
   end
 
   def load() do
-    HPS.Core.list_products()
+    HPS.Core.list_products(:all)
     |> HPS.Repo.preload(rolled_packages: [:files, :rollout])
     |> Stream.map(fn %{rolled_packages: packages} = product ->
       Map.delete(%{product | packages: packages}, :rolled_packages)
