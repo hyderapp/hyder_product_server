@@ -45,7 +45,8 @@ defmodule HPS.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:credo, "~> 1.1.5"},
       {:ex_machina, "~> 2.3"},
-      {:phoenix_swagger, "~> 0.8"}
+      {:phoenix_swagger, "~> 0.8"},
+      {:basic_auth, "~> 2.2.2"}
     ]
   end
 

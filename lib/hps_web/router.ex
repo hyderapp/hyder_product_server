@@ -9,6 +9,10 @@ defmodule HPSWeb.Router do
     plug(:put_secure_browser_headers)
   end
 
+  pipeline :admin do
+    plug(BasicAuth, callback: &HPSWeb.Auth.authorize_user/3)
+  end
+
   pipeline :api do
     plug(:accepts, ["json"])
   end
@@ -50,7 +54,7 @@ defmodule HPSWeb.Router do
   end
 
   scope "/admin", HPSWeb.Admin do
-    pipe_through(:api)
+    pipe_through([:api, :admin])
 
     resources("/products", ProductController, except: [:new, :edit], param: "name") do
       resources("/packages", PackageController, except: [:new, :edit], param: "version")
