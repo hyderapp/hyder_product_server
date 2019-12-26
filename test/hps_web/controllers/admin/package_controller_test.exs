@@ -53,7 +53,7 @@ defmodule HPSWeb.PackageControllerTest do
     setup [:create_package]
 
     test "deletes chosen package", %{conn: conn, package: package} do
-      conn = delete(conn, product_package_path(conn, :delete, package.product, package))
+      conn = delete(conn, product_package_path(conn, :delete, package.product.name, package))
       assert response(conn, 200)
 
       conn = get(conn, product_package_path(conn, :show, package.product, package))

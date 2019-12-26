@@ -2,22 +2,23 @@ defmodule HPSWeb.Admin.PackageController do
   use HPSWeb, :controller
 
   alias HPS.Core
-  alias HPS.Core.{Product}
   alias HPS.Repo
+
+  plug(HPSWeb.RequireProduct)
 
   action_fallback(HPSWeb.FallbackController)
 
-  def index(conn, %{"product_name" => product_name}) do
-    with {:ok, %Product{} = product} <- fetch_product(product_name, conn),
-         packages <- Core.list_packages(product) do
+  def index(conn, _params) do
+    with packages <- Core.list_packages(conn.assigns.product) do
       conn
       |> render("index.json", packages: packages)
     end
   end
 
-  def create(conn, %{"product_name" => product_name} = params) do
-    with {:ok, product} <- fetch_product(product_name, conn),
-         {:ok, params} <- prepare_create(params, product),
+  def create(conn, params) do
+    product = conn.assigns.product
+
+    with {:ok, params} <- prepare_create(params, product),
          {:ok, package} <- Core.create_or_update_package(product, params) do
       conn
       |> put_status(:created)
@@ -25,17 +26,15 @@ defmodule HPSWeb.Admin.PackageController do
     end
   end
 
-  def show(conn, %{"version" => version, "product_name" => product_name}) do
-    with {:ok, product} <- fetch_product(product_name, conn),
-         {:ok, package} <- fetch_package(product.id, version) do
+  def show(conn, %{"version" => version}) do
+    with {:ok, package} <- fetch_package(conn.assigns.product.id, version) do
       conn
       |> render("show-with-detail.json", package: package)
     end
   end
 
-  def delete(conn, %{"version" => version, "product_name" => product_name}) do
-    with {:ok, product} <- fetch_product(product_name, conn),
-         {:ok, package} <- Core.get_package_by_version(product.id, version),
+  def delete(conn, %{"version" => version}) do
+    with {:ok, package} <- Core.get_package_by_version(conn.assigns.product.id, version),
          {:ok, _} <- Core.delete_package(package) do
       conn
       |> render("delete.json", [])
@@ -43,10 +42,6 @@ defmodule HPSWeb.Admin.PackageController do
       {:error, :not_found} ->
         render(conn, "delete.json", [])
     end
-  end
-
-  defp fetch_product(version, conn) do
-    Core.get_product_by_name(version, conn.assigns.namespace)
   end
 
   defp fetch_package(product_id, version) do
