@@ -23,7 +23,7 @@ defmodule HPS.Store.Product do
   # ----------------------
   def list, do: GenServer.call(@name, :list)
 
-  def refresh(), do: GenServer.cast(@name, :refresh)
+  def refresh(), do: GenServer.call(@name, :refresh)
 
   # ----------------------
   #  callbacks
@@ -34,7 +34,7 @@ defmodule HPS.Store.Product do
 
   def handle_call(:list, _from, state), do: {:reply, state, state}
 
-  def handle_cast(:refresh, _state), do: {:noreply, reload()}
+  def handle_call(:refresh, _from, _state), do: {:reply, :ok, reload()}
 
   if Mix.env() == :test do
     defp reload(), do: []

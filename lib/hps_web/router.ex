@@ -10,7 +10,10 @@ defmodule HPSWeb.Router do
   end
 
   pipeline :admin do
-    plug(BasicAuth, callback: &HPSWeb.Auth.authorize_user/3)
+    plug(BasicAuth,
+      callback: &HPSWeb.Auth.authorize_user/3,
+      custom_response: &HPSWeb.Auth.unauthorized_response/1
+    )
   end
 
   pipeline :api do

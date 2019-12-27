@@ -35,6 +35,14 @@ defmodule HPSWeb.ConnCase do
       Ecto.Adapters.SQL.Sandbox.mode(HPS.Repo, {:shared, self()})
     end
 
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+    {:ok, conn: Phoenix.ConnTest.build_conn() |> use_basic_auth()}
+  end
+
+  defp use_basic_auth(conn) do
+    {user, name} = Application.get_env(:hps, :basic_auth_wl, [{"test", "test"}]) |> hd()
+    content = Base.encode64("#{user}:#{name}")
+
+    conn
+    |> Plug.Conn.put_req_header("authorization", "Basic #{content}")
   end
 end
