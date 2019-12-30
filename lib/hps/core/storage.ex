@@ -26,6 +26,10 @@ defmodule HPS.Core.Storage do
     apply(engine(), :locate_archive, [package])
   end
 
+  def archive_download_url(namespace, product_name, version) do
+    apply(engine(), :archive_download_url, [namespace, product_name, version])
+  end
+
   defp engine, do: Application.get_env(:hps, :storage, __MODULE__.Local)
 
   defmodule Local do
@@ -33,6 +37,7 @@ defmodule HPS.Core.Storage do
     Default storage engine with ability of interacting with local file system.
     """
     require Logger
+    alias HPSWeb.Router.Helpers, as: Routes
 
     def save_archive(%{archive: archive} = package) do
       path = archive_path(package)
@@ -60,6 +65,25 @@ defmodule HPS.Core.Storage do
         :archive_storage_path,
         Path.join([:code.priv_dir(:hps), "archive"])
       )
+    end
+
+    def archive_download_url("default", product, version),
+      do:
+        Routes.download_url(HPSWeb.Endpoint, :show, [
+          product_package_name(product, version)
+        ])
+
+    def archive_download_url(ns, product, version),
+      do:
+        Routes.download_url(
+          HPSWeb.Endpoint,
+          :show,
+          [product_package_name(product, version)],
+          namespace: ns
+        )
+
+    defp product_package_name(product, version) do
+      "#{product}-#{version}.zip"
     end
   end
 end

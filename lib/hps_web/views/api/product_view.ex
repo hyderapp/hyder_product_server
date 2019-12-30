@@ -33,16 +33,6 @@ defmodule HPSWeb.API.ProductView do
     }
   end
 
-  defp full_download_url(product, version, "default"),
-    do: Routes.download_url(HPSWeb.Endpoint, :show, [product_package_name(product, version)])
-
   defp full_download_url(product, version, ns),
-    do:
-      Routes.download_url(HPSWeb.Endpoint, :show, [product_package_name(product, version)],
-        namespace: ns
-      )
-
-  defp product_package_name(product, version) do
-    "#{product}-#{version}.zip"
-  end
+    do: HPS.Core.Storage.archive_download_url(ns, name, version)
 end
