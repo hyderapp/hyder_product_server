@@ -34,5 +34,5 @@ defmodule HPSWeb.API.ProductView do
   end
 
   defp full_download_url(product, version, ns),
-    do: HPS.Core.Storage.archive_download_url(ns, name, version)
+    do: HPS.Core.Storage.archive_download_url(ns, product, version)
 end
