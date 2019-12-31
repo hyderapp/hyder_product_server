@@ -38,7 +38,7 @@ defmodule HPS.Store.Product do
 
   def handle_call(:list, _from, state), do: {:reply, state, state}
 
-  def handle_call(:refresh, _from, state) do
+  def handle_call(:refresh, _from, _state) do
     for pid <- :pg2.get_members(__MODULE__), pid != self() do
       send(pid, :reload)
     end
