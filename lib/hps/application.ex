@@ -14,7 +14,6 @@ defmodule HPS.Application do
       HPSWeb.Endpoint,
       # Starts a worker by calling: HPS.Worker.start_link(arg)
       # {HPS.Worker, arg},
-      {Registry, [keys: :unique, name: HPS.Registry]},
       HPS.Store.Product
     ]
 

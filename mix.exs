@@ -20,7 +20,7 @@ defmodule HPS.MixProject do
   def application do
     [
       mod: {HPS.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :pg2]
     ]
   end
 
