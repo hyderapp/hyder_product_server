@@ -58,7 +58,7 @@ defmodule HPSWeb.API.ProductController do
       |> Stream.filter(&(&1.namespace == conn.assigns.namespace))
       |> Stream.reject(&(&1.packages == []))
 
-    caches = %{enabled: true, paths: Hyder.Product.all_paths(products)}
+    caches = %{enabled: false, paths: Hyder.Product.all_paths(products)}
     render(conn, "index.json", products: products, caches: caches)
   end
 end
